@@ -109,3 +109,90 @@ input[type='submit']:disabled,
 button:disabled {
   background-color: rgb(122, 160, 248);
 }
+
+:root {
+  --red: red;
+  --light-red: lightpink;
+  --orange: orange;
+  --light-orange: #ffd580;
+  --yellow: #f5e653;
+  --light-yellow: lightyellow;
+  --green: green;
+  --light-green: lightgreen;
+  --blue: blue;
+  --light-blue: lightblue;
+  --purple: purple;
+  --light-purple: plum;
+}
+
+.Fill--red {
+  background-color: var(--light-red);
+}
+
+.Border--red {
+  border-color: var(--red);
+}
+
+.Dropshadow--red {
+  box-shadow: 0px 0px 10px 10px var(--red);
+}
+
+.Fill--orange {
+  background-color: var(--light-orange);
+}
+
+.Border--orange {
+  border-color: var(--orange);
+}
+
+.Dropshadow--orange {
+  box-shadow: 0px 0px 10px 10px var(--orange);
+}
+
+.Fill--yellow {
+  background-color: var(--light-yellow);
+}
+
+.Border--yellow {
+  border-color: var(--yellow);
+}
+
+.Dropshadow--yellow {
+  box-shadow: 0px 0px 10px 10px var(--yellow);
+}
+
+.Fill--green {
+  background-color: var(--light-green);
+}
+
+.Border--green {
+  border-color: var(--green);
+}
+
+.Dropshadow--green {
+  box-shadow: 0px 0px 10px 10px var(--green);
+}
+
+.Fill--blue {
+  background-color: var(--light-blue);
+}
+
+.Border--blue {
+  border-color: var(--blue);
+}
+
+.Dropshadow--blue {
+  box-shadow: 0px 0px 10px 10px var(--blue);
+}
+
+.Fill--purple {
+  background-color: var(--light-purple);
+}
+
+.Border--purple {
+  border-color: var(--purple);
+}
+
+.Dropshadow--purple {
+  box-shadow: 0px 0px 10px 10px var(--purple);
+}

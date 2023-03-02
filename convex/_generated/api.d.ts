@@ -10,8 +10,11 @@
  */
 
 import type { ApiFromModules } from "convex/api";
-import type * as listMessages from "../listMessages";
-import type * as sendMessage from "../sendMessage";
+import type * as actions_addSporcleQuiz from "../actions/addSporcleQuiz";
+import type * as addSporcleQuiz from "../addSporcleQuiz";
+import type * as game from "../game";
+import type * as sessions from "../sessions";
+import type * as soundOfSilence from "../soundOfSilence";
 
 /**
  * A type describing your app's public Convex API.
@@ -23,6 +26,9 @@ import type * as sendMessage from "../sendMessage";
  * `ConvexReactClient` to create app-specific types.
  */
 export type API = ApiFromModules<{
-  listMessages: typeof listMessages;
-  sendMessage: typeof sendMessage;
+  "actions/addSporcleQuiz": typeof actions_addSporcleQuiz;
+  addSporcleQuiz: typeof addSporcleQuiz;
+  game: typeof game;
+  sessions: typeof sessions;
+  soundOfSilence: typeof soundOfSilence;
 }>;
