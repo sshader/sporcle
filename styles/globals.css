@@ -110,89 +110,65 @@ button:disabled {
   background-color: rgb(122, 160, 248);
 }
 
-:root {
-  --red: red;
-  --light-red: lightpink;
-  --orange: orange;
-  --light-orange: #ffd580;
-  --yellow: #f5e653;
-  --light-yellow: lightyellow;
-  --green: green;
-  --light-green: lightgreen;
-  --blue: blue;
-  --light-blue: lightblue;
-  --purple: purple;
-  --light-purple: plum;
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
 }
 
-.Fill--red {
-  background-color: var(--light-red);
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.Border--red {
-  border-color: var(--red);
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
-.Dropshadow--red {
-  box-shadow: 0px 0px 10px 10px var(--red);
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
-.Fill--orange {
-  background-color: var(--light-orange);
+input:checked + .slider {
+  background-color: #2196f3;
 }
 
-.Border--orange {
-  border-color: var(--orange);
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196f3;
 }
 
-.Dropshadow--orange {
-  box-shadow: 0px 0px 10px 10px var(--orange);
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
 }
 
-.Fill--yellow {
-  background-color: var(--light-yellow);
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
 }
 
-.Border--yellow {
-  border-color: var(--yellow);
-}
-
-.Dropshadow--yellow {
-  box-shadow: 0px 0px 10px 10px var(--yellow);
-}
-
-.Fill--green {
-  background-color: var(--light-green);
-}
-
-.Border--green {
-  border-color: var(--green);
-}
-
-.Dropshadow--green {
-  box-shadow: 0px 0px 10px 10px var(--green);
-}
-
-.Fill--blue {
-  background-color: var(--light-blue);
-}
-
-.Border--blue {
-  border-color: var(--blue);
-}
-
-.Dropshadow--blue {
-  box-shadow: 0px 0px 10px 10px var(--blue);
-}
-
-.Fill--purple {
-  background-color: var(--light-purple);
-}
-
-.Border--purple {
-  border-color: var(--purple);
-}
-
-.Dropshadow--purple {
-  box-shadow: 0px 0px 10px 10px var(--purple);
+.slider.round:before {
+  border-radius: 50%;
 }

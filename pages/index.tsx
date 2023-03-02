@@ -21,7 +21,13 @@ const PlayerEdit = ({ session }: { session: Document<'sessions'> }) => {
 
   return (
     <div
-      style={{ alignItems: 'center', display: 'flex', flexDirection: 'row' }}
+      style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 5,
+      }}
     >
       <h1>You: </h1>
       <fieldset>
@@ -51,6 +57,45 @@ const PlayerEdit = ({ session }: { session: Document<'sessions'> }) => {
       </fieldset>
     </div>
   )
+}
+
+const GamePicker = () => {
+  const { results, loadMore, status } = usePaginatedQuery(
+    'game:getPublicGames',
+    {
+      initialNumItems: 10,
+    }
+  )
+  const router = useRouter()
+  async function handleStartGame(gameId: Id<'game'>) {
+    await router.push({
+      pathname: '/game/[gameId]',
+      query: {
+        gameId: gameId.id,
+      },
+    })
+  }
+
+  if (results) {
+    const listItems = results.map((r) => {
+      return (
+        <li
+          style={{ display: 'flex', justifyContent: 'space-between' }}
+          key={r._id.id}
+        >
+          {r.title ?? 'Ongoing game'}
+          <button onClick={() => handleStartGame(r._id)}>Join game</button>
+        </li>
+      )
+    })
+    return (
+      <div>
+        <h1>Ongoing games:</h1>
+        <ul>{listItems}</ul>
+      </div>
+    )
+  }
+  return renderLoading()
 }
 
 const QuizPicker = () => {
@@ -90,6 +135,7 @@ const QuizPicker = () => {
     })
     return (
       <div>
+        <h1>Quizzes:</h1>
         <ul>
           {listItems}
           <li style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -120,6 +166,7 @@ export default function App() {
   return (
     <div>
       <PlayerEdit session={session} />
+      <GamePicker />
       <QuizPicker />
     </div>
   )

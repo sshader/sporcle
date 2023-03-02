@@ -19,14 +19,16 @@ const Players = ({ players }: { players: Document<'sessions'>[] }) => {
       {players.map((p) => {
         return (
           <div
+            key={p._id.id}
             style={{
               display: 'flex',
               border: 'black solid 1px',
               padding: 10,
+              gap: 5,
               alignItems: 'center',
             }}
           >
-            {p.name}{' '}
+            <div>{p.name}</div>
             <div
               style={{
                 display: 'inline',
@@ -67,6 +69,7 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
   const [answerText, setAnswerText] = useState('')
   const submitAnswer = useSessionMutation('game:submitAnswer')
   const endGame = useMutation('game:endGame')
+  const setPublic = useMutation('game:setPublic')
   const game = gameInfo.game
 
   const isPossibleAnswer = (answer: string) => {
@@ -111,8 +114,50 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
       </div>
     )
   })
+
+  const guessInput = (
+    <input
+      value={answerText}
+      onChange={handleChange}
+      placeholder="Type your guess…"
+    />
+  )
+
+  const gameControls = (
+    <div
+      style={{
+        display: 'flex',
+        gap: 5,
+        alignItems: 'center',
+      }}
+    >
+      <button onClick={() => endGame(game._id)}>Give up</button>
+      <p>Make public?</p>
+      <label className="switch">
+        <input
+          type="checkbox"
+          checked={game.isPublic}
+          onChange={async (event) => {
+            await setPublic(game._id, event.target.checked)
+          }}
+        />
+        <span className="slider round"></span>
+      </label>
+    </div>
+  )
   return (
     <div>
+      <div
+        style={{
+          display: 'flex',
+          gap: 5,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {game.title ? <h1>{game.title}</h1> : null}
+        {game.finished ? null : gameControls}
+      </div>
       <div
         style={{
           display: 'flex',
@@ -123,12 +168,7 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
       >
         {answerBoxes}
       </div>
-      <input
-        value={answerText}
-        onChange={handleChange}
-        placeholder="Type your guess…"
-      />
-      <button onClick={() => endGame(game._id)}>Give up</button>
+      {game.finished ? null : guessInput}
     </div>
   )
 }

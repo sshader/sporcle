@@ -5,7 +5,7 @@ import { mutationWithSession } from './sessions'
 
 export const getQuizzes = query(
   async ({ db }, paginationOpts: PaginationOptions) => {
-    return await db.query('quiz').paginate(paginationOpts)
+    return await db.query('quiz').order('desc').paginate(paginationOpts)
   }
 )
 
@@ -14,10 +14,31 @@ export const startGame = mutationWithSession(
     const quiz = (await db.get(quizId))!
     return await db.insert('game', {
       quiz: quiz._id,
+      title: quiz.title,
       finished: false,
       answers: quiz.answers.map(() => null),
       players: new Set([session!._id.id]),
     })
+  }
+)
+
+export const setPublic = mutation(
+  async ({ db }, gameId: Id<'game'>, isPublic: boolean) => {
+    await db.patch(gameId, {
+      isPublic,
+    })
+  }
+)
+
+export const getPublicGames = query(
+  async ({ db }, paginationOpts: PaginationOptions) => {
+    return await db
+      .query('game')
+      .withIndex('by_finished_and_public', (q) =>
+        q.eq('finished', false).eq('isPublic', true)
+      )
+      .order('desc')
+      .paginate(paginationOpts)
   }
 )
 

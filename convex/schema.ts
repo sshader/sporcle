@@ -11,6 +11,7 @@ export default defineSchema({
   }),
   game: defineTable({
     quiz: s.id('quiz'),
+    title: s.optional(s.string()),
     answers: s.array(
       s.union(
         s.object({
@@ -22,7 +23,8 @@ export default defineSchema({
     ),
     players: s.set(s.string()),
     finished: s.optional(s.boolean()),
-  }),
+    isPublic: s.optional(s.boolean()),
+  }).index('by_finished_and_public', ['finished', 'isPublic']),
   sessions: defineTable({
     color: s.string(),
     name: s.string(),
