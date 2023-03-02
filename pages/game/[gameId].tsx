@@ -1,5 +1,5 @@
 import { Id } from '../../convex/_generated/dataModel'
-import { useQuery } from '../../convex/_generated/react'
+import { useQuery, useMutation } from '../../convex/_generated/react'
 
 import { Document } from '../../convex/_generated/dataModel'
 import { ChangeEvent, useState } from 'react'
@@ -66,6 +66,7 @@ const GameBoundary = () => {
 const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
   const [answerText, setAnswerText] = useState('')
   const submitAnswer = useSessionMutation('game:submitAnswer')
+  const endGame = useMutation('game:endGame')
   const game = gameInfo.game
 
   const isPossibleAnswer = (answer: string) => {
@@ -127,6 +128,7 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
         onChange={handleChange}
         placeholder="Type your guess…"
       />
+      <button onClick={() => endGame(game._id)}>Give up</button>
     </div>
   )
 }

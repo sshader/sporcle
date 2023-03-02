@@ -21,6 +21,7 @@ export default defineSchema({
       )
     ),
     players: s.set(s.string()),
+    finished: s.optional(s.boolean()),
   }),
   sessions: defineTable({
     color: s.string(),

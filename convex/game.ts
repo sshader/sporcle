@@ -14,11 +14,34 @@ export const startGame = mutationWithSession(
     const quiz = (await db.get(quizId))!
     return await db.insert('game', {
       quiz: quiz._id,
+      finished: false,
       answers: quiz.answers.map(() => null),
       players: new Set([session!._id.id]),
     })
   }
 )
+
+export const endGame = mutation(async ({ db }, gameId: Id<'game'>) => {
+  const game = (await db.get(gameId))!
+  const quiz = (await db.get(game.quiz))!
+  const finishSessionId = await db.insert('sessions', {
+    color: '#ffffff',
+    name: 'Revealed',
+  })
+  quiz.answers.forEach((validAnswers, index) => {
+    if (game.answers[index] === null) {
+      game.answers[index] = {
+        answer: Array.from(validAnswers)[0],
+        answeredBy: finishSessionId,
+      }
+    }
+  })
+  return await db.patch(gameId, {
+    quiz: quiz._id,
+    finished: true,
+    answers: game.answers,
+  })
+})
 
 export const getGame = query(async ({ db }, gameId: Id<'game'>) => {
   const game = (await db.get(gameId))!
@@ -44,6 +67,9 @@ export const getGame = query(async ({ db }, gameId: Id<'game'>) => {
 export const submitAnswer = mutationWithSession(
   async ({ db, session }, gameId: Id<'game'>, answer: string) => {
     const game = (await db.get(gameId))!
+    if (game.finished === true) {
+      return false
+    }
 
     game.players.add(session!._id.id)
 
