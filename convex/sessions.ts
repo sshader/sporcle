@@ -90,7 +90,7 @@ export const queryWithSession = <
 export const create = mutation(async ({ db }) => {
   return db.insert('sessions', {
     name: 'User ' + Math.floor(Math.random() * 10000).toString(),
-    color: Math.floor(Math.random() * 16777215).toString(16),
+    color: '#' + Math.floor(Math.random() * 16777215).toString(16),
   })
 })
 

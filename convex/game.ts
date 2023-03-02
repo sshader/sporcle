@@ -25,7 +25,9 @@ export const getGame = query(async ({ db }, gameId: Id<'game'>) => {
   const quiz = (await db.get(game.quiz))!
   const sessionIds = game.players
   const sessions = await Promise.all(
-    [...sessionIds].map((sessionId) => db.get(new Id('sessions', sessionId)))
+    Array.from(sessionIds).map((sessionId) =>
+      db.get(new Id('sessions', sessionId))
+    )
   )
   const sessionsMap = new Map()
   sessions.forEach((session) => {
