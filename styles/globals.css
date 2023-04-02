@@ -29,6 +29,7 @@ h1 {
   text-align: center;
   margin-bottom: 16px;
 }
+
 .badge span {
   background-color: #212529;
   color: #ffffff;
@@ -66,10 +67,12 @@ li span:nth-child(1) {
   margin-right: 4px;
   white-space: nowrap;
 }
+
 li span:nth-child(2) {
   margin-right: 4px;
   word-break: break-word;
 }
+
 li span:nth-child(3) {
   color: #6c757d;
   margin-left: auto;
@@ -110,65 +113,97 @@ button:disabled {
   background-color: rgb(122, 160, 248);
 }
 
-/* The switch - the box around the slider */
-.switch {
+.toggle {
+  cursor: pointer;
+}
+
+.toggle-switch {
+  background: #ccc;
+  border-radius: 16px;
+  width: 58px;
+  height: 32px;
+  position: relative;
+  vertical-align: middle;
+  transition: background 0.25s;
+}
+.toggle-switch:before,
+.toggle-switch:after {
+  content: '';
+}
+.toggle-switch:before {
+  background: linear-gradient(to bottom, #fff 0%, #eee 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  transition: left 0.25s;
+}
+.toggle:hover .toggle-switch:before {
+  background: linear-gradient(to bottom, #fff 0%, #fff 100%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+.toggle-checkbox:checked + .toggle-switch {
+  background: rgb(49, 108, 244);
+}
+.toggle-checkbox:checked + .toggle-switch:before {
+  left: 30px;
+}
+
+.toggle-checkbox {
+  position: absolute;
+  visibility: hidden;
+}
+
+.toggle-label {
+  margin-left: 5px;
+  position: relative;
+  top: 2px;
+}
+
+.item-enter {
+  background-color: #fda7df;
+}
+
+.item-enter-active {
+  background-color: white;
+  transition: background-color 500ms ease-in;
+}
+
+.tooltip {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  border-bottom: 1px dotted black;
 }
 
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
   position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -60px;
 }
 
-.slider:before {
-  position: absolute;
+.tooltip .tooltiptext::after {
   content: '';
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
 }
 
-input:checked + .slider {
-  background-color: #2196f3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }

@@ -1,5 +1,5 @@
-import { useState, FormEvent } from 'react'
-import { Document, Id } from '../convex/_generated/dataModel'
+import { useState } from 'react'
+import { Doc, Id } from '../convex/_generated/dataModel'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useSessionMutation, useSessionQuery } from '../hooks/sessionClient'
@@ -14,7 +14,7 @@ const renderLoading = () => {
   )
 }
 
-const PlayerEdit = ({ session }: { session: Document<'sessions'> }) => {
+const PlayerEdit = ({ session }: { session: Doc<'sessions'> }) => {
   const updateSession = useSessionMutation('sessions:update')
   const [name, setName] = useState(session.name)
   const [color, setColor] = useState(session.color)
@@ -30,42 +30,36 @@ const PlayerEdit = ({ session }: { session: Document<'sessions'> }) => {
       }}
     >
       <h1>You: </h1>
-      <fieldset>
-        <input
-          value={name}
-          onChange={async (event) => {
-            const newName = event.target.value
-            setName(newName)
-            await updateSession({ name: newName, color })
-          }}
-          placeholder="Your name"
-        />
-        <label htmlFor="color">
-          Color
-          <input
-            type="color"
-            id="color"
-            name="color"
-            value={color}
-            onChange={async (event) => {
-              const newColor = event.target.value as any
-              setColor(newColor)
-              await updateSession({ name, color: newColor })
-            }}
-          />
-        </label>
-      </fieldset>
+      <input
+        value={name}
+        data-tooltip="Name"
+        onChange={async (event) => {
+          const newName = event.target.value
+          setName(newName)
+          await updateSession({ name: newName, color })
+        }}
+        placeholder="Your name"
+      />
+      <input
+        type="color"
+        id="color"
+        name="color"
+        value={color}
+        data-tooltip="Color"
+        onChange={async (event) => {
+          const newColor = event.target.value as any
+          setColor(newColor)
+          await updateSession({ name, color: newColor })
+        }}
+      />
     </div>
   )
 }
 
 const GamePicker = () => {
-  const { results, loadMore, status } = usePaginatedQuery(
-    'game:getPublicGames',
-    {
-      initialNumItems: 10,
-    }
-  )
+  const { results } = usePaginatedQuery('game:getPublicGames', {
+    initialNumItems: 10,
+  })
   const router = useRouter()
   async function handleStartGame(gameId: Id<'game'>) {
     await router.push({

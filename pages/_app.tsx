@@ -9,7 +9,7 @@ const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ConvexProvider client={convex}>
-      <SessionProvider storageLocation={'sessionStorage'}>
+      <SessionProvider storageLocation={'localStorage'}>
         <Component {...pageProps} />
       </SessionProvider>
     </ConvexProvider>

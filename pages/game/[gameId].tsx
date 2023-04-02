@@ -1,19 +1,20 @@
 import { Id } from '../../convex/_generated/dataModel'
 import { useQuery, useMutation } from '../../convex/_generated/react'
 
-import { Document } from '../../convex/_generated/dataModel'
-import { ChangeEvent, useState } from 'react'
+import { Doc } from '../../convex/_generated/dataModel'
+import { ChangeEvent, createRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSessionMutation } from '../../hooks/sessionClient'
+import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
 type GameInfo = {
-  game: Document<'game'>
+  game: Doc<'game'>
   obfuscatedAnswers: Set<string>
   charMap: Record<string, string>
-  sessionsMap: Map<string, Document<'sessions'>>
+  sessionsMap: Map<string, Doc<'sessions'>>
 }
 
-const Players = ({ players }: { players: Document<'sessions'>[] }) => {
+const Players = ({ players }: { players: Doc<'sessions'>[] }) => {
   return (
     <div style={{ display: 'flex' }}>
       {players.map((p) => {
@@ -22,21 +23,16 @@ const Players = ({ players }: { players: Document<'sessions'>[] }) => {
             key={p._id.id}
             style={{
               display: 'flex',
-              border: 'black solid 1px',
               padding: 10,
               gap: 5,
               alignItems: 'center',
+              margin: '2px',
+              cursor: 'default',
+              border: `${p.color} solid 5px`,
+              borderRadius: '5px',
             }}
           >
-            <div>{p.name}</div>
-            <div
-              style={{
-                display: 'inline',
-                backgroundColor: p.color,
-                width: '1em',
-                height: '1em',
-              }}
-            ></div>
+            {p.name}
           </div>
         )
       })}
@@ -58,20 +54,85 @@ const GameBoundary = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <Players players={Array.from(parsedGameInfo.sessionsMap.values())} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Players players={Array.from(parsedGameInfo.sessionsMap.values())} />
+        <GameControls game={parsedGameInfo.game} />
+      </div>
       <Game gameInfo={parsedGameInfo}></Game>
     </div>
   )
 }
 
-const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
+const GuessInput = ({
+  isPossibleAnswer,
+  submitAnswer,
+}: {
+  isPossibleAnswer: (text: string) => boolean
+  submitAnswer: (text: string) => Promise<boolean>
+}) => {
   const [answerText, setAnswerText] = useState('')
-  const submitAnswer = useSessionMutation('game:submitAnswer')
+  const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const text = event.target.value
+    setAnswerText(text)
+    if (isPossibleAnswer(text)) {
+      const wasCorrect = await submitAnswer(text)
+      if (wasCorrect) {
+        setAnswerText('')
+      }
+    }
+  }
+  return (
+    <input
+      value={answerText}
+      onChange={handleChange}
+      placeholder="Type your guess…"
+    />
+  )
+}
+
+const GameControls = ({ game }: { game: Doc<'game'> }) => {
   const endGame = useMutation('game:endGame')
   const setPublic = useMutation('game:setPublic')
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: 5,
+        alignContent: 'center',
+      }}
+    >
+      <label
+        className="toggle"
+        style={{ display: 'flex', gap: 5, alignItems: 'center' }}
+      >
+        <div className="toggle-label">Make public?</div>
+        <input
+          className="toggle-checkbox"
+          type="checkbox"
+          checked={game.isPublic ?? false}
+          onChange={async (event) => {
+            await setPublic(game._id, event.target.checked)
+          }}
+        />
+        <div className="toggle-switch"></div>
+      </label>
+      <button onClick={() => endGame(game._id)}>Give up</button>
+    </div>
+  )
+}
+
+const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
   const game = gameInfo.game
 
+  const submitAnswer = useSessionMutation('game:submitAnswer')
   const isPossibleAnswer = (answer: string) => {
     let translated = ''
     for (const c of answer.split('')) {
@@ -79,95 +140,68 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
     }
     return gameInfo.obfuscatedAnswers.has(translated)
   }
-
-  const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const text = event.target.value
-    setAnswerText(text)
-    if (isPossibleAnswer(text)) {
-      const wasCorrect = await submitAnswer(game._id, text)
-      if (wasCorrect) {
-        setAnswerText('')
-      }
-    }
-  }
-  const answerBoxes = game.answers.map((value, index) => {
-    let content = null
-    if (value !== null) {
-      const answer = value.answer
-      const answeredBy = gameInfo.sessionsMap.get(value.answeredBy.id)
-      const color = answeredBy?.color
-      content = (
-        <div
-          data-tooltip={answeredBy?.name}
-          style={{ border: `${color} solid 5px` }}
-        >
-          {answer}
-        </div>
-      )
-    }
-    return (
-      <div
-        key={index.toString()}
-        style={{ height: '2em', border: 'black solid 1px', minWidth: 100 }}
-      >
-        {content}
-      </div>
-    )
-  })
-
   const guessInput = (
-    <input
-      value={answerText}
-      onChange={handleChange}
-      placeholder="Type your guess…"
+    <GuessInput
+      isPossibleAnswer={isPossibleAnswer}
+      submitAnswer={(text: string) => submitAnswer(game._id, text)}
     />
   )
 
-  const gameControls = (
-    <div
+  const answerBoxes = (
+    <TransitionGroup
       style={{
         display: 'flex',
-        gap: 5,
-        alignItems: 'center',
+        flexWrap: 'wrap',
+        flexDirection: 'column',
+        height: '75vh',
       }}
     >
-      <button onClick={() => endGame(game._id)}>Give up</button>
-      <p>Make public?</p>
-      <label className="switch">
-        <input
-          type="checkbox"
-          checked={game.isPublic}
-          onChange={async (event) => {
-            await setPublic(game._id, event.target.checked)
-          }}
-        />
-        <span className="slider round"></span>
-      </label>
-    </div>
+      {game.answers.map((value, index) => {
+        if (value !== null) {
+          const answeredBy = gameInfo.sessionsMap.get(value.answeredBy.id)!
+          const nodeRef = createRef<HTMLDivElement>()
+          return (
+            <CSSTransition
+              key={index}
+              nodeRef={nodeRef}
+              timeout={500}
+              classNames="item"
+            >
+              <div
+                ref={nodeRef}
+                className="tooltip"
+                style={{
+                  margin: '2px',
+                  cursor: 'default',
+                  border: `${answeredBy.color} solid 5px`,
+                  borderRadius: '5px',
+                }}
+              >
+                <span className="tooltiptext">{answeredBy.name}</span>
+                {value.answer}
+              </div>
+            </CSSTransition>
+          )
+        } else {
+          return (
+            <div
+              key={index}
+              style={{
+                height: '2em',
+                margin: '2px',
+                border: 'black solid 1px',
+                minWidth: 100,
+              }}
+            ></div>
+          )
+        }
+      })}
+    </TransitionGroup>
   )
+
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          gap: 5,
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        {game.title ? <h1>{game.title}</h1> : null}
-        {game.finished ? null : gameControls}
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          flexDirection: 'column',
-          height: '75vh',
-        }}
-      >
-        {answerBoxes}
-      </div>
+      {answerBoxes}
       {game.finished ? null : guessInput}
     </div>
   )
