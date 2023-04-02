@@ -25,7 +25,7 @@ import { useQuery, useMutation } from '../convex/_generated/react'
 
 const StoreKey = 'ConvexSessionId'
 
-const SessionContext = React.createContext<Id<'sessions'> | null>(null)
+export const SessionContext = React.createContext<Id<'sessions'> | null>(null)
 
 /**
  * Context for a Convex session, creating a server session and providing the id.

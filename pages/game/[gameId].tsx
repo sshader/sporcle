@@ -2,25 +2,38 @@ import { Id } from '../../convex/_generated/dataModel'
 import { useQuery, useMutation } from '../../convex/_generated/react'
 
 import { Doc } from '../../convex/_generated/dataModel'
-import { ChangeEvent, createRef, useState } from 'react'
+import { ChangeEvent, createRef, useContext, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useSessionMutation } from '../../hooks/sessionClient'
+import { useSessionMutation, SessionContext } from '../../hooks/sessionClient'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
 type GameInfo = {
   game: Doc<'game'>
   obfuscatedAnswers: Set<string>
   charMap: Record<string, string>
-  sessionsMap: Map<string, Doc<'sessions'>>
+  sessionsMap: Map<string, { session: Doc<'sessions'>; score: number }>
 }
 
-const Players = ({ players }: { players: Doc<'sessions'>[] }) => {
+const Players = ({
+  players,
+  total,
+}: {
+  players: { session: Doc<'sessions'>; score: number }[]
+  total: number
+}) => {
+  const sessionId = useContext(SessionContext)!
+  const currentPlayerIndex = players.findIndex((p) =>
+    p.session._id.equals(sessionId)
+  )
+  const currentPlayer = players[currentPlayerIndex]
+  players[currentPlayerIndex] = players[0]
+  players[0] = currentPlayer
   return (
     <div style={{ display: 'flex' }}>
       {players.map((p) => {
         return (
           <div
-            key={p._id.id}
+            key={p.session._id.id}
             style={{
               display: 'flex',
               padding: 10,
@@ -28,11 +41,17 @@ const Players = ({ players }: { players: Doc<'sessions'>[] }) => {
               alignItems: 'center',
               margin: '2px',
               cursor: 'default',
-              border: `${p.color} solid 5px`,
+              border: `${p.session.color} solid 5px`,
               borderRadius: '5px',
             }}
           >
-            {p.name}
+            <div className="tooltip">
+              {p.session.name}
+              <span className="tooltiptext">
+                Score: {p.score} / {total} (
+                {Math.floor((p.score / total) * 100).toString()}%)
+              </span>
+            </div>
           </div>
         )
       })}
@@ -55,6 +74,16 @@ const GameBoundary = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+        <h2>{gameInfo.title}</h2>
+        <span>
+          (
+          <a href={gameInfo.sporcleUrl} target="_blank">
+            Original quiz
+          </a>
+          )
+        </span>
+      </div>
       <div
         style={{
           display: 'flex',
@@ -63,8 +92,11 @@ const GameBoundary = () => {
           alignItems: 'center',
         }}
       >
-        <Players players={Array.from(parsedGameInfo.sessionsMap.values())} />
-        <GameControls game={parsedGameInfo.game} />
+        <Players
+          players={Array.from(parsedGameInfo.sessionsMap.values())}
+          total={gameInfo.game.answers.length}
+        />
+        <GameControls gameInfo={parsedGameInfo} />
       </div>
       <Game gameInfo={parsedGameInfo}></Game>
     </div>
@@ -98,7 +130,8 @@ const GuessInput = ({
   )
 }
 
-const GameControls = ({ game }: { game: Doc<'game'> }) => {
+const GameControls = ({ gameInfo }: { gameInfo: GameInfo }) => {
+  const game = gameInfo.game
   const endGame = useMutation('game:endGame')
   const setPublic = useMutation('game:setPublic')
   return (
@@ -134,8 +167,9 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
 
   const submitAnswer = useSessionMutation('game:submitAnswer')
   const isPossibleAnswer = (answer: string) => {
+    const trimmed = answer.trim()
     let translated = ''
-    for (const c of answer.split('')) {
+    for (const c of trimmed.split('')) {
       translated += gameInfo.charMap[c] ?? c
     }
     return gameInfo.obfuscatedAnswers.has(translated)
@@ -143,7 +177,7 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
   const guessInput = (
     <GuessInput
       isPossibleAnswer={isPossibleAnswer}
-      submitAnswer={(text: string) => submitAnswer(game._id, text)}
+      submitAnswer={(text: string) => submitAnswer(game._id, text.trim())}
     />
   )
 
@@ -173,11 +207,11 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
                 style={{
                   margin: '2px',
                   cursor: 'default',
-                  border: `${answeredBy.color} solid 5px`,
+                  border: `${answeredBy.session.color} solid 5px`,
                   borderRadius: '5px',
                 }}
               >
-                <span className="tooltiptext">{answeredBy.name}</span>
+                <span className="tooltiptext">{answeredBy.session.name}</span>
                 {value.answer}
               </div>
             </CSSTransition>
