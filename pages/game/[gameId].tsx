@@ -25,6 +25,10 @@ const Players = ({
   const currentPlayerIndex = players.findIndex((p) =>
     p.session._id.equals(sessionId)
   )
+  if (currentPlayerIndex === -1) {
+    return null;
+  }
+  
   const currentPlayer = players[currentPlayerIndex]
   players[currentPlayerIndex] = players[0]
   players[0] = currentPlayer
