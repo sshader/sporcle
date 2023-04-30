@@ -26,9 +26,9 @@ const Players = ({
     p.session._id.equals(sessionId)
   )
   if (currentPlayerIndex === -1) {
-    return null;
+    return null
   }
-  
+
   const currentPlayer = players[currentPlayerIndex]
   players[currentPlayerIndex] = players[0]
   players[0] = currentPlayer
@@ -67,7 +67,7 @@ const GameBoundary = () => {
   const router = useRouter()
   const gameIdStr: string = router.query.gameId! as string
   const gameId = new Id('game', gameIdStr)
-  const gameInfo = useQuery('game:getGame', gameId)
+  const gameInfo = useQuery('game:getGame', { gameId })
   if (gameInfo === undefined) {
     return <div>Loading</div>
   }
@@ -156,12 +156,15 @@ const GameControls = ({ gameInfo }: { gameInfo: GameInfo }) => {
           type="checkbox"
           checked={game.isPublic ?? false}
           onChange={async (event) => {
-            await setPublic(game._id, event.target.checked)
+            await setPublic({
+              gameId: game._id,
+              isPublic: event.target.checked,
+            })
           }}
         />
         <div className="toggle-switch"></div>
       </label>
-      <button onClick={() => endGame(game._id)}>Give up</button>
+      <button onClick={() => endGame({ gameId: game._id })}>Give up</button>
     </div>
   )
 }
@@ -181,7 +184,9 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
   const guessInput = (
     <GuessInput
       isPossibleAnswer={isPossibleAnswer}
-      submitAnswer={(text: string) => submitAnswer(game._id, text.trim())}
+      submitAnswer={(text: string) =>
+        submitAnswer({ gameId: game._id, answer: text.trim() })
+      }
     />
   )
 

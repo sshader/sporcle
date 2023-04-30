@@ -1,32 +1,33 @@
-import { defineSchema, defineTable, s } from 'convex/schema'
+import { defineSchema, defineTable } from 'convex/schema'
+import { v } from 'convex/values'
 
 export default defineSchema({
   quiz: defineTable({
-    answers: s.array(s.set(s.string())),
-    title: s.string(),
-    sporcleUrl: s.string(),
-    obfuscatedAnswers: s.set(s.string()),
+    answers: v.array(v.set(v.string())),
+    title: v.string(),
+    sporcleUrl: v.string(),
+    obfuscatedAnswers: v.set(v.string()),
     // stringified JSON
-    charMap: s.string(),
+    charMap: v.string(),
   }),
   game: defineTable({
-    quiz: s.id('quiz'),
-    title: s.optional(s.string()),
-    answers: s.array(
-      s.union(
-        s.object({
-          answer: s.string(),
-          answeredBy: s.id('sessions'),
+    quiz: v.id('quiz'),
+    title: v.optional(v.string()),
+    answers: v.array(
+      v.union(
+        v.object({
+          answer: v.string(),
+          answeredBy: v.id('sessions'),
         }),
-        s.null()
+        v.null()
       )
     ),
-    players: s.set(s.string()),
-    finished: s.optional(s.boolean()),
-    isPublic: s.optional(s.boolean()),
+    players: v.set(v.string()),
+    finished: v.optional(v.boolean()),
+    isPublic: v.optional(v.boolean()),
   }).index('by_finished_and_public', ['finished', 'isPublic']),
   sessions: defineTable({
-    color: s.string(),
-    name: s.string(),
+    color: v.string(),
+    name: v.string(),
   }),
 })

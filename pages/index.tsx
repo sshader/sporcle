@@ -57,9 +57,13 @@ const PlayerEdit = ({ session }: { session: Doc<'sessions'> }) => {
 }
 
 const GamePicker = () => {
-  const { results } = usePaginatedQuery('game:getPublicGames', {
-    initialNumItems: 10,
-  })
+  const { results } = usePaginatedQuery(
+    'game:getPublicGames',
+    {},
+    {
+      initialNumItems: 10,
+    }
+  )
   const router = useRouter()
   async function handleStartGame(gameId: Id<'game'>) {
     await router.push({
@@ -93,15 +97,17 @@ const GamePicker = () => {
 }
 
 const QuizPicker = () => {
-  const { results, loadMore, status } = usePaginatedQuery('game:getQuizzes', {
-    initialNumItems: 10,
-  })
+  const { results } = usePaginatedQuery(
+    'game:getQuizzes',
+    {},
+    { initialNumItems: 10 }
+  )
   const startGame = useSessionMutation('game:startGame')
   const addQuiz = useAction('actions/addSporcleQuiz')
   const router = useRouter()
   const [quizUrl, setQuizUrl] = useState('')
   async function handleStartGame(quizId: Id<'quiz'>) {
-    const gameId = await startGame(quizId)
+    const gameId = await startGame({ quizId })
     await router.push({
       pathname: '/game/[gameId]',
       query: {
@@ -112,7 +118,7 @@ const QuizPicker = () => {
 
   async function handleQuizImport() {
     setQuizUrl('')
-    await addQuiz(quizUrl)
+    await addQuiz({ sporcleUrl: quizUrl })
   }
 
   if (results) {

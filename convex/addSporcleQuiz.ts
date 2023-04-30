@@ -1,4 +1,5 @@
-import { mutation, query } from './_generated/server'
+import { v } from 'convex/values'
+import { internalMutation, query } from './_generated/server'
 
 const translateAnswers = (
   rawAnswers: string[],
@@ -25,25 +26,33 @@ const translateAnswers = (
   return translatedAnswers
 }
 
-export const doesQuizExist = query(async ({ db }, sporcleUrl: string) => {
-  const existingQuiz = await db
-    .query('quiz')
-    .filter((q) => q.eq(q.field('sporcleUrl'), sporcleUrl))
-    .unique()
-  return existingQuiz !== null
+export const doesQuizExist = query({
+  args: {
+    sporcleUrl: v.string(),
+  },
+  handler: async ({ db }, { sporcleUrl }) => {
+    const existingQuiz = await db
+      .query('quiz')
+      .filter((q) => q.eq(q.field('sporcleUrl'), sporcleUrl))
+      .unique()
+    return existingQuiz !== null
+  },
 })
 
-export default mutation(
-  (
+export const internal = internalMutation({
+  args: {
+    sporcleUrl: v.string(),
+    title: v.string(),
+    obfuscatedAnswersStr: v.string(),
+    charMapStr: v.string(),
+  },
+  handler: (
     { db },
-    sporcleUrl: string,
-    title: string,
-    obfustacedAnswersStr: string,
-    charMapStr: string
+    { sporcleUrl, title, obfuscatedAnswersStr, charMapStr }
   ) => {
     const charMap = JSON.parse(charMapStr)
     // "foo\\'bar" -> "foo\'bar" because something got double escaped
-    const x = obfustacedAnswersStr.replaceAll('\\', '')
+    const x = obfuscatedAnswersStr.replaceAll('\\', '')
     const obfuscatedAnswers = JSON.parse(x)
     const obfuscatedAnswersSet = new Set<string>()
     for (const a of obfuscatedAnswers) {
@@ -59,5 +68,5 @@ export default mutation(
       obfuscatedAnswers: obfuscatedAnswersSet,
       charMap: JSON.stringify(charMap),
     })
-  }
-)
+  },
+})

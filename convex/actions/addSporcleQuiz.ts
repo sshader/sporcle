@@ -1,18 +1,22 @@
+'use node'
 import { action } from '../_generated/server'
-import fetch from 'node-fetch'
 import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
+import { v } from 'convex/values'
 
-export default action(
-  async ({ runQuery, runMutation }, sporcleLink: string) => {
-    if (!sporcleLink.startsWith('https://www.sporcle.com/')) {
+export default action({
+  args: { sporcleUrl: v.string() },
+  handler: async ({ runQuery, runMutation }, { sporcleUrl }) => {
+    if (!sporcleUrl.startsWith('https://www.sporcle.com/')) {
       throw new Error("Sporcle link didn't start with https://www.sporcle.com/")
     }
-    const exists = await runQuery('addSporcleQuiz:doesQuizExist', sporcleLink)
+    const exists = await runQuery('addSporcleQuiz:doesQuizExist', {
+      sporcleUrl,
+    })
     if (exists) {
       return
     }
-    const response = await fetch(sporcleLink, {
+    const response = await fetch(sporcleUrl, {
       // Sporcle's Cloudflare configuration seems to block the request if there's
       // not a user agent
       headers: { 'User-Agent': 'curl/7.54.1' },
@@ -47,12 +51,11 @@ export default action(
       },
     })
 
-    await runMutation(
-      'addSporcleQuiz',
-      sporcleLink,
-      quizTitle,
-      allAnswers,
-      charMap
-    )
-  }
-)
+    await runMutation('addSporcleQuiz:internal', {
+      sporcleUrl,
+      title: quizTitle,
+      obfuscatedAnswersStr: allAnswers,
+      charMapStr: charMap,
+    })
+  },
+})
