@@ -1,16 +1,16 @@
 import { ObjectType, PropertyValidators, v } from 'convex/values'
-import { Doc } from './_generated/dataModel'
+import { Doc } from '../_generated/dataModel'
 import {
   DatabaseReader,
   MutationCtx,
   QueryCtx,
   mutation,
   query,
-} from './_generated/server'
+} from '../_generated/server'
 import {
   MergeArgsForRegistered,
   generateMiddlewareContextOnly,
-} from './lib/middlewareUtils'
+} from './middlewareUtils'
 import {
   ArgsArray,
   RegisteredMutation,
@@ -126,30 +126,3 @@ export function queryWithSession<Args extends ArgsArray, Output>(
 export function queryWithSession(func: any): any {
   return query(withSession(func))
 }
-
-export const create = mutation(async ({ db }) => {
-  return db.insert('sessions', {
-    name: 'User ' + Math.floor(Math.random() * 10000).toString(),
-    color: '#' + Math.floor(Math.random() * 16777215).toString(16),
-  })
-})
-
-export const get = query({
-  args: { sessionId: v.union(v.null(), v.string()) },
-  handler: async ({ db }, { sessionId }) => {
-    const normalizedId = sessionId
-      ? db.normalizeId('sessions', sessionId)
-      : null
-    return normalizedId ? await db.get(normalizedId) : null
-  },
-})
-
-export const update = mutationWithSession({
-  args: { name: v.string(), color: v.string() },
-  handler: async ({ db, session }, { name, color }) => {
-    return await db.patch(session._id, {
-      name,
-      color,
-    })
-  },
-})

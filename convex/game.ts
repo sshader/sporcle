@@ -1,4 +1,4 @@
-import { mutation, query } from './_generated/server'
+import { internalMutation, mutation, query } from './_generated/server'
 import { Doc } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
@@ -141,5 +141,18 @@ export const submitAnswer = mutationWithSession({
     })
     await db.patch(gameId, game)
     return correct
+  },
+})
+
+export const normalizeGame = internalMutation({
+  args: {},
+  handler: async ({ db }, {}) => {
+    const games = await db.query('game').collect()
+    for (const game of games) {
+      const normalizedPlayers = Array.from(game.players).map(
+        (s) => db.normalizeId('sessions', s)!
+      )
+      db.patch(game._id, { players: new Set(normalizedPlayers) })
+    }
   },
 })

@@ -1,5 +1,5 @@
 import { api } from '../convex/_generated/api'
-import { useQuery, useMutation, useAction, useConvex } from 'convex/react'
+import { useQuery, useMutation, useConvex } from 'convex/react'
 /**
  * React helpers for adding session data to Convex functions.
  *
@@ -40,6 +40,7 @@ export const SessionProvider: React.FC<{
     typeof window === 'undefined'
       ? null
       : window[storageLocation ?? 'sessionStorage']
+  const convex = useConvex()
   const [sessionId, setSession] = useState<string | null>(() => {
     const stored = store?.getItem(StoreKey)
     if (stored) {
@@ -52,7 +53,11 @@ export const SessionProvider: React.FC<{
   // Get or set the ID from our desired storage location, whenever it changes.
   useEffect(() => {
     if (sessionId) {
-      store?.setItem(StoreKey, sessionId)
+      void (async () => {
+        const session = await convex.query(api.sessions.get, { sessionId })
+        setSession(session!._id)
+        store?.setItem(StoreKey, session!._id)
+      })()
     } else {
       void (async () => {
         setSession(await createSession())

@@ -13,7 +13,8 @@ import type { ApiFromModules } from "convex/server";
 import type * as actions_addSporcleQuiz from "../actions/addSporcleQuiz";
 import type * as addSporcleQuiz from "../addSporcleQuiz";
 import type * as game from "../game";
-import type * as middlewareUtils from "../middlewareUtils";
+import type * as lib_middlewareUtils from "../lib/middlewareUtils";
+import type * as lib_withSession from "../lib/withSession";
 import type * as sessions from "../sessions";
 
 /**
@@ -28,6 +29,7 @@ export declare const api: ApiFromModules<{
   "actions/addSporcleQuiz": typeof actions_addSporcleQuiz;
   addSporcleQuiz: typeof addSporcleQuiz;
   game: typeof game;
-  middlewareUtils: typeof middlewareUtils;
+  "lib/middlewareUtils": typeof lib_middlewareUtils;
+  "lib/withSession": typeof lib_withSession;
   sessions: typeof sessions;
 }>;
