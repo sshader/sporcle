@@ -1,5 +1,5 @@
-import { Id } from '../../convex/_generated/dataModel'
-import { useQuery, useMutation } from '../../convex/_generated/react'
+import { api } from '../../convex/_generated/api'
+import { useQuery, useMutation } from 'convex/react'
 
 import { Doc } from '../../convex/_generated/dataModel'
 import { ChangeEvent, createRef, useContext, useState } from 'react'
@@ -22,8 +22,8 @@ const Players = ({
   total: number
 }) => {
   const sessionId = useContext(SessionContext)!
-  const currentPlayerIndex = players.findIndex((p) =>
-    p.session._id.equals(sessionId)
+  const currentPlayerIndex = players.findIndex(
+    (p) => p.session._id === sessionId
   )
   if (currentPlayerIndex === -1) {
     return null
@@ -37,7 +37,7 @@ const Players = ({
       {players.map((p) => {
         return (
           <div
-            key={p.session._id.id}
+            key={p.session._id}
             style={{
               display: 'flex',
               padding: 10,
@@ -66,8 +66,7 @@ const Players = ({
 const GameBoundary = () => {
   const router = useRouter()
   const gameIdStr: string = router.query.gameId! as string
-  const gameId = new Id('game', gameIdStr)
-  const gameInfo = useQuery('game:getGame', { gameId })
+  const gameInfo = useQuery(api.game.getGame, { gameId: gameIdStr })
   if (gameInfo === undefined) {
     return <div>Loading</div>
   }
@@ -136,8 +135,8 @@ const GuessInput = ({
 
 const GameControls = ({ gameInfo }: { gameInfo: GameInfo }) => {
   const game = gameInfo.game
-  const endGame = useMutation('game:endGame')
-  const setPublic = useMutation('game:setPublic')
+  const endGame = useMutation(api.game.endGame)
+  const setPublic = useMutation(api.game.setPublic)
   return (
     <div
       style={{
@@ -172,7 +171,7 @@ const GameControls = ({ gameInfo }: { gameInfo: GameInfo }) => {
 const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
   const game = gameInfo.game
 
-  const submitAnswer = useSessionMutation('game:submitAnswer')
+  const submitAnswer = useSessionMutation(api.game.submitAnswer)
   const isPossibleAnswer = (answer: string) => {
     const trimmed = answer.trim()
     let translated = ''
@@ -201,7 +200,7 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
     >
       {game.answers.map((value, index) => {
         if (value !== null) {
-          const answeredBy = gameInfo.sessionsMap.get(value.answeredBy.id)!
+          const answeredBy = gameInfo.sessionsMap.get(value.answeredBy)!
           const nodeRef = createRef<HTMLDivElement>()
           return (
             <CSSTransition

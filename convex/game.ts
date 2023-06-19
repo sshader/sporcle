@@ -1,5 +1,5 @@
 import { mutation, query } from './_generated/server'
-import { Doc, Id } from './_generated/dataModel'
+import { Doc } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
 
@@ -23,7 +23,7 @@ export const startGame = mutationWithSession({
       title: quiz.title,
       finished: false,
       answers: quiz.answers.map(() => null),
-      players: new Set([session!._id.id]),
+      players: new Set([session!._id]),
     })
   },
 })
@@ -74,28 +74,29 @@ export const endGame = mutation({
       quiz: quiz._id,
       finished: true,
       answers: game.answers,
-      players: game.players.add(finishSessionId.id),
+      players: game.players.add(finishSessionId),
     })
   },
 })
 
 export const getGame = query({
-  args: { gameId: v.id('game') },
+  args: { gameId: v.string() },
   handler: async ({ db }, { gameId }) => {
-    const game = (await db.get(gameId))!
+    const normalizedId = db.normalizeId('game', gameId)!
+    const game = (await db.get(normalizedId))!
     const quiz = (await db.get(game.quiz))!
     const sessionIds = game.players
     const sessions: Doc<'sessions'>[] = await Promise.all(
       Array.from(sessionIds).map(async (sessionId) => {
-        return (await db.get(new Id('sessions', sessionId)))!
+        return (await db.get(db.normalizeId('sessions', sessionId)!))!
       })
     )
     const sessionsMap = new Map()
     sessions.forEach((session) => {
-      sessionsMap.set(session?._id.id, { session, score: 0 })
+      sessionsMap.set(session?._id, { session, score: 0 })
     })
     game.answers.forEach((value) => {
-      const answeredBy = value?.answeredBy.id ?? null
+      const answeredBy = value?.answeredBy ?? null
       if (answeredBy !== null) {
         const current = sessionsMap.get(answeredBy)
         sessionsMap.set(answeredBy, {
@@ -123,7 +124,7 @@ export const submitAnswer = mutationWithSession({
       return false
     }
 
-    game.players.add(session!._id.id)
+    game.players.add(session!._id)
 
     const quizId = game?.quiz
     const quiz = (await db.get(quizId))!

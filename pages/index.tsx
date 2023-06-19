@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { api } from '../convex/_generated/api'
+import { useAction, usePaginatedQuery, useQuery } from 'convex/react'
+import { useContext, useState } from 'react'
 import { Doc, Id } from '../convex/_generated/dataModel'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useSessionMutation, useSessionQuery } from '../hooks/sessionClient'
-import { useAction, usePaginatedQuery } from '../convex/_generated/react'
+import { SessionContext, useSessionMutation } from '../hooks/sessionClient'
 
 const renderLoading = () => {
   return (
@@ -15,7 +16,7 @@ const renderLoading = () => {
 }
 
 const PlayerEdit = ({ session }: { session: Doc<'sessions'> }) => {
-  const updateSession = useSessionMutation('sessions:update')
+  const updateSession = useSessionMutation(api.sessions.update)
   const [name, setName] = useState(session.name)
   const [color, setColor] = useState(session.color)
 
@@ -58,7 +59,7 @@ const PlayerEdit = ({ session }: { session: Doc<'sessions'> }) => {
 
 const GamePicker = () => {
   const { results } = usePaginatedQuery(
-    'game:getPublicGames',
+    api.game.getPublicGames,
     {},
     {
       initialNumItems: 10,
@@ -69,7 +70,7 @@ const GamePicker = () => {
     await router.push({
       pathname: '/game/[gameId]',
       query: {
-        gameId: gameId.id,
+        gameId: gameId,
       },
     })
   }
@@ -79,7 +80,7 @@ const GamePicker = () => {
       return (
         <li
           style={{ display: 'flex', justifyContent: 'space-between' }}
-          key={r._id.id}
+          key={r._id}
         >
           {r.title ?? 'Ongoing game'}
           <button onClick={() => handleStartGame(r._id)}>Join game</button>
@@ -98,12 +99,12 @@ const GamePicker = () => {
 
 const QuizPicker = () => {
   const { results } = usePaginatedQuery(
-    'game:getQuizzes',
+    api.game.getQuizzes,
     {},
     { initialNumItems: 10 }
   )
-  const startGame = useSessionMutation('game:startGame')
-  const addQuiz = useAction('actions/addSporcleQuiz')
+  const startGame = useSessionMutation(api.game.startGame)
+  const addQuiz = useAction(api.actions.addSporcleQuiz.default)
   const router = useRouter()
   const [quizUrl, setQuizUrl] = useState('')
   async function handleStartGame(quizId: Id<'quiz'>) {
@@ -111,7 +112,7 @@ const QuizPicker = () => {
     await router.push({
       pathname: '/game/[gameId]',
       query: {
-        gameId: gameId.id,
+        gameId: gameId,
       },
     })
   }
@@ -126,7 +127,7 @@ const QuizPicker = () => {
       return (
         <li
           style={{ display: 'flex', justifyContent: 'space-between' }}
-          key={r._id.id}
+          key={r._id}
         >
           {r.title}
           <button onClick={() => handleStartGame(r._id)}>Start quiz</button>
@@ -159,7 +160,8 @@ const QuizPicker = () => {
 }
 
 export default function App() {
-  const session = useSessionQuery('sessions:get')
+  const sessionId = useContext(SessionContext)
+  const session = useQuery(api.sessions.get, { sessionId })
   if (session === undefined || session === null) {
     return renderLoading()
   }
