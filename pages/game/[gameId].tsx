@@ -40,7 +40,7 @@ const Players = ({
             key={p.session._id}
             style={{
               display: 'flex',
-              padding: 10,
+              padding: 5,
               gap: 5,
               alignItems: 'center',
               margin: '2px',
@@ -76,16 +76,21 @@ const GameBoundary = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-        <h2>{gameInfo.title}</h2>
-        <span>
-          (
-          <a href={gameInfo.sporcleUrl} target="_blank">
-            Original quiz
-          </a>
-          )
-        </span>
+    <div
+      style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: 5 }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 5 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+          <h2>{gameInfo.title}</h2>
+          <span>
+            (
+            <a href={gameInfo.sporcleUrl} target="_blank">
+              Original quiz
+            </a>
+            )
+          </span>
+        </div>
+        <GameControls gameInfo={parsedGameInfo} />
       </div>
       <div
         style={{
@@ -99,7 +104,6 @@ const GameBoundary = () => {
           players={Array.from(parsedGameInfo.sessionsMap.values())}
           total={gameInfo.game.answers.length}
         />
-        <GameControls gameInfo={parsedGameInfo} />
       </div>
       <Game gameInfo={parsedGameInfo}></Game>
     </div>
@@ -195,8 +199,10 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
         display: 'flex',
         flexWrap: 'wrap',
         flexDirection: 'column',
+        justifyContent: 'center',
         height: '75vh',
       }}
+      component="div"
     >
       {game.answers.map((value, index) => {
         if (value !== null) {
@@ -243,7 +249,7 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
 
   return (
     <div>
-      {answerBoxes}
+      <div style={{ overflow: 'auto' }}>{answerBoxes}</div>
       {game.finished ? null : guessInput}
     </div>
   )
