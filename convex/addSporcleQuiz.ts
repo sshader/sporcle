@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { internalMutation, query } from './_generated/server';
+import { internalMutation, query } from './_generated/server'
 
 const translateAnswers = (
   rawAnswers: string[],
@@ -10,7 +10,7 @@ const translateAnswers = (
     reverseMapping[charMapping[char]] = char
   }
 
-  const translatedAnswers: Array<Set<string>> = []
+  const translatedAnswers: Array<Array<string>> = []
   for (const answer of rawAnswers) {
     let translatedAnswer = ''
     for (const char of answer.split('')) {
@@ -20,7 +20,7 @@ const translateAnswers = (
         translatedAnswer += char
       }
     }
-    const answers = new Set(translatedAnswer.split('/'))
+    const answers = translatedAnswer.split('/')
     translatedAnswers.push(answers)
   }
   return translatedAnswers
@@ -65,7 +65,7 @@ export const internal = internalMutation({
       answers,
       title,
       sporcleUrl,
-      obfuscatedAnswers: obfuscatedAnswersSet,
+      obfuscatedAnswers: Array.from(obfuscatedAnswersSet),
       charMap: JSON.stringify(charMap),
     })
   },

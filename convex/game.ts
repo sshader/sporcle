@@ -23,7 +23,7 @@ export const startGame = mutationWithSession({
       title: quiz.title,
       finished: false,
       answers: quiz.answers.map(() => null),
-      players: new Set([session!._id]),
+      players: [session!._id],
     })
   },
 })
@@ -70,11 +70,13 @@ export const endGame = mutation({
         }
       }
     })
+    const players = new Set(game.players)
+    players.add(finishSessionId)
     return await db.patch(gameId, {
       quiz: quiz._id,
       finished: true,
       answers: game.answers,
-      players: game.players.add(finishSessionId),
+      players: Array.from(players),
     })
   },
 })
@@ -124,14 +126,16 @@ export const submitAnswer = mutationWithSession({
       return false
     }
 
-    game.players.add(session!._id)
+    const players = new Set(game.players)
+    players.add(session!._id)
+    game.players = Array.from(players)
 
     const quizId = game?.quiz
     const quiz = (await db.get(quizId))!
 
     let correct = false
     quiz.answers.forEach((validAnswers, index) => {
-      if (validAnswers.has(answer) && game.answers[index] === null) {
+      if (validAnswers.indexOf(answer) !== -1 && game.answers[index] === null) {
         correct = true
         game.answers[index] = {
           answer,
@@ -141,18 +145,5 @@ export const submitAnswer = mutationWithSession({
     })
     await db.patch(gameId, game)
     return correct
-  },
-})
-
-export const normalizeGame = internalMutation({
-  args: {},
-  handler: async ({ db }, {}) => {
-    const games = await db.query('game').collect()
-    for (const game of games) {
-      const normalizedPlayers = Array.from(game.players).map(
-        (s) => db.normalizeId('sessions', s)!
-      )
-      db.patch(game._id, { players: new Set(normalizedPlayers) })
-    }
   },
 })

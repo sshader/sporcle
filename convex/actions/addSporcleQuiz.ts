@@ -1,6 +1,6 @@
-'use node';
-import { api } from "../_generated/api";
-import { action } from '../_generated/server';
+'use node'
+import { api, internal } from '../_generated/api'
+import { action } from '../_generated/server'
 import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
 import { v } from 'convex/values'
@@ -52,7 +52,7 @@ export default action({
       },
     })
 
-    await runMutation(api.addSporcleQuiz.internal, {
+    await runMutation(internal.addSporcleQuiz.internal, {
       sporcleUrl,
       title: quizTitle,
       obfuscatedAnswersStr: allAnswers,

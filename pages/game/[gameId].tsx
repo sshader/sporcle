@@ -72,6 +72,7 @@ const GameBoundary = () => {
   }
   const parsedGameInfo: GameInfo = {
     ...gameInfo,
+    obfuscatedAnswers: new Set(gameInfo.obfuscatedAnswers),
     charMap: JSON.parse(gameInfo.charMap),
   }
 

@@ -3,10 +3,10 @@ import { v } from 'convex/values'
 
 export default defineSchema({
   quiz: defineTable({
-    answers: v.array(v.set(v.string())),
+    answers: v.array(v.array(v.string())),
     title: v.string(),
     sporcleUrl: v.string(),
-    obfuscatedAnswers: v.set(v.string()),
+    obfuscatedAnswers: v.array(v.string()),
     // stringified JSON
     charMap: v.string(),
   }),
@@ -22,7 +22,7 @@ export default defineSchema({
         v.null()
       )
     ),
-    players: v.set(v.string()),
+    players: v.array(v.string()),
     finished: v.optional(v.boolean()),
     isPublic: v.optional(v.boolean()),
   }).index('by_finished_and_public', ['finished', 'isPublic']),
