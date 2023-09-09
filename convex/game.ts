@@ -12,7 +12,7 @@ export const getQuizzes = query({
   },
 })
 
-export const startGame = mutationWithSession({
+export const start = mutationWithSession({
   args: {
     quizId: v.id('quiz'),
   },
