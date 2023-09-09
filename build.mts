@@ -6,38 +6,34 @@ const main = async () => {
     identifier: process.env.VERCEL_GIT_COMMIT_REF,
     hash: process.env.VERCEL_GIT_COMMIT_SHA,
   }
-  console.log(process.env.CONVEX_DEPLOY_KEY)
-  let output = execSync(
-    `CONVEX_DEPLOYMENT='affable-caiman-602' CONVEX_DEPLOY_KEY='dev:affable-caiman-602|01bb59b062321ca08ae057ca39d5e4ec25fc51502381f247604f36ce76281f0e47fa667c72c4da3420a6d0ac7da8a9ae3f75' npx convex run claimInstance --no-push '${JSON.stringify(
-      claimInstanceArgs
-    )}'`,
-    {
-      encoding: 'utf-8',
-    }
+  const claimUrl = new URL(
+    `https://${process.env.COORDINATOR_CONVEX_URL}.convex.site/claimInstance`
   )
+  claimUrl.searchParams.append('sk', process.env.COORDINATOR_SECRET_KEY!)
+  const claimResponse = await fetch(claimUrl, {
+    method: 'POST',
+    body: JSON.stringify(claimInstanceArgs),
+    headers: { 'content-type': 'application/json' },
+  })
+  if (!claimResponse.ok) {
+    throw new Error(`Failed to claim instance: ${await claimResponse.text()}`)
+  }
 
   const claimedInstanceInfo: { instanceName: string; deploymentKey: string } =
-    JSON.parse(output)
+    await claimResponse.json()
 
-  execSync(
-    `CONVEX_DEPLOYMENT='${
-      claimedInstanceInfo.instanceName
-    }' CONVEX_DEPLOY_KEY='${
-      claimedInstanceInfo.deploymentKey
-    }' npx convex run updatePreviewInfoForClaim --no-push '${JSON.stringify(
-      claimInstanceArgs
-    )}'`,
-    {
-      encoding: 'utf-8',
-    }
+  const setupUrl = new URL(
+    `https://${claimedInstanceInfo.instanceName}.convex.site/setup`
   )
-
-  execSync(
-    `CONVEX_DEPLOYMENT='${claimedInstanceInfo.instanceName}' CONVEX_DEPLOY_KEY='${claimedInstanceInfo.deploymentKey}' npx convex run clearData --no-push '{}'`,
-    {
-      encoding: 'utf-8',
-    }
-  )
+  setupUrl.searchParams.append('sk', claimedInstanceInfo.deploymentKey)
+  const setupResponse = await fetch(setupUrl, {
+    method: 'POST',
+    body: JSON.stringify(claimInstanceArgs),
+    headers: { 'content-type': 'application/json' },
+  })
+  if (!setupResponse.ok) {
+    throw new Error(`Failed to set up instance: ${await setupResponse.text()}`)
+  }
 
   execSync(
     `CONVEX_DEPLOYMENT='${claimedInstanceInfo.instanceName}' CONVEX_DEPLOY_KEY='${claimedInstanceInfo.deploymentKey}' npx convex deploy`,
@@ -46,12 +42,16 @@ const main = async () => {
     }
   )
 
-  execSync(
-    `CONVEX_DEPLOYMENT='${claimedInstanceInfo.instanceName}' CONVEX_DEPLOY_KEY='${claimedInstanceInfo.deploymentKey}' npx convex run addSeedData --no-push`,
-    {
-      encoding: 'utf-8',
-    }
+  const seedUrl = new URL(
+    `https://${claimedInstanceInfo.instanceName}.convex.site/setup`
   )
+  seedUrl.searchParams.append('sk', claimedInstanceInfo.deploymentKey)
+  const seedResponse = await fetch(seedUrl, {
+    method: 'POST',
+  })
+  if (!seedResponse.ok) {
+    throw new Error(`Failed to set up instance: ${await seedResponse.text()}`)
+  }
 
   execSync(
     `NEXT_PUBLIC_CONVEX_URL='https://${claimedInstanceInfo.instanceName}.convex.cloud' NEXT_PUBLIC_DEPLOYMENT_IDENTIFIER='${process.env.VERCEL_GIT_COMMIT_REF} NEXT_PUBLIC_DEPLOYMENT_HASH='${process.env.VERCEL_GIT_COMMIT_SHA}' next build`,
