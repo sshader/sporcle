@@ -6,8 +6,9 @@ const main = async () => {
     identifier: process.env.VERCEL_GIT_COMMIT_REF,
     hash: process.env.VERCEL_GIT_COMMIT_SHA,
   }
+  console.log(process.env.CONVEX_DEPLOY_KEY)
   let output = execSync(
-    `npx convex run claimInstance --no-push '${JSON.stringify(
+    `CONVEX_DEPLOYMENT='affable-caiman-602' CONVEX_DEPLOY_KEY='dev:affable-caiman-602|01bb59b062321ca08ae057ca39d5e4ec25fc51502381f247604f36ce76281f0e47fa667c72c4da3420a6d0ac7da8a9ae3f75' npx convex run claimInstance --no-push '${JSON.stringify(
       claimInstanceArgs
     )}'`,
     {
