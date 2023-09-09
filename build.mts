@@ -61,7 +61,7 @@ const main = async () => {
 
   console.log('Building frontend')
   execSync(
-    `NEXT_PUBLIC_CONVEX_URL='https://${claimedInstanceInfo.instanceName}.convex.cloud' NEXT_PUBLIC_DEPLOYMENT_IDENTIFIER='${process.env.VERCEL_GIT_COMMIT_REF} NEXT_PUBLIC_DEPLOYMENT_HASH='${process.env.VERCEL_GIT_COMMIT_SHA}' next build`,
+    `NEXT_PUBLIC_CONVEX_URL='https://${claimedInstanceInfo.instanceName}.convex.cloud' NEXT_PUBLIC_DEPLOYMENT_IDENTIFIER='${process.env.VERCEL_GIT_COMMIT_REF}' NEXT_PUBLIC_DEPLOYMENT_HASH='${process.env.VERCEL_GIT_COMMIT_SHA}' next build`,
     {
       encoding: 'utf-8',
     }
