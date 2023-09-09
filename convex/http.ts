@@ -27,7 +27,9 @@ http.route({
     if (sk !== process.env.SECRET_KEY) {
       return new Response('Invalid secret key', { status: 403 })
     }
-    const body: { identifier: string; hash: string } = await request.json()
+    const bodyText = await request.text()
+    console.log(bodyText)
+    const body: { identifier: string; hash: string } = JSON.parse(bodyText)
     await ctx.runMutation(internal.init.updatePreviewInfoForClaim, body)
     await ctx.runMutation(internal.init.clearData)
     return new Response('success', {
