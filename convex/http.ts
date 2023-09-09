@@ -23,6 +23,7 @@ http.route({
   method: 'POST',
   handler: httpAction(async (ctx, request) => {
     const sk = new URL(request.url).searchParams.get('sk')
+    console.log(sk, process.env.SECRET_KEY)
     if (sk !== process.env.SECRET_KEY) {
       return new Response('Invalid secret key', { status: 403 })
     }

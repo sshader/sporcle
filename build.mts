@@ -6,6 +6,7 @@ const main = async () => {
     identifier: process.env.VERCEL_GIT_COMMIT_REF,
     hash: process.env.VERCEL_GIT_COMMIT_SHA,
   }
+  console.log(JSON.stringify(claimInstanceArgs))
   const claimUrl = new URL(
     `https://${process.env.COORDINATOR_CONVEX_URL}.convex.site/claimInstance`
   )
