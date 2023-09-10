@@ -311,7 +311,6 @@ export const addSeedData = internalMutation({
         'https://www.sporcle.com/games/chasing_destiny/tswiftallsongs',
       obfuscatedAnswers,
       charMap: charMapStr,
-      foo: 'test 123',
       answers,
     })
     const previewInfo = await ctx.db.query(PreviewInfoTableName).first()
