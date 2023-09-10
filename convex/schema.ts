@@ -27,6 +27,7 @@ export default defineSchema({
   game: defineTable({
     quiz: v.id('quiz'),
     title: v.optional(v.string()),
+    owner: v.id('sessions'),
     answers: v.array(
       v.union(
         v.object({
