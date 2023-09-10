@@ -17,6 +17,8 @@ function fallbackRender({ error }: FallbackProps) {
   )
 }
 
+// Ensure this UI is talking to the correct backend
+// Wrap any part of the app that talks to Convex in this (e.g. right below the ConvexProvider)
 function CheckDeploymentInfo({ children }: { children: React.ReactNode }) {
   const check = useQuery(api.checkInfo.default, {
     identifier: process.env.NEXT_PUBLIC_DEPLOYMENT_IDENTIFIER ?? '',

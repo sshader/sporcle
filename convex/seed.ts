@@ -1,13 +1,12 @@
-import { v } from 'convex/values'
-import { internalAction, internalMutation, mutation } from './_generated/server'
-import { internal } from './_generated/api'
-import schema from './schema'
-import { TableNames } from './_generated/dataModel'
 import { translateAnswers } from './addSporcleQuiz'
+import { v } from 'convex/values'
+import { internalMutation } from './_generated/server'
+import schema, { PreviewInfoTableName } from './schema'
+import { TableNames } from './_generated/dataModel'
 
 export const addSeedData = internalMutation({
   args: {},
-  handler: async (ctx, {}) => {
+  handler: async (ctx, _args) => {
     const charMapStr =
       '{"0":"(","1":"e","2":"^","3":"j","4":"=","5":"#","6":"{","7":"s","8":"E","9":"S","O":")","^":"~","v":"<","Q":"h","$":"I","T":"%","D":"O","B":"[",">":"y","_":"w","*":"J","j":"X","x":"n","m":"&","l":"d","s":"l","N":"0","%":"$","d":"*","o":"_","L":"Q","a":"a","n":"v","k":"2","f":"@","X":"N","G":"r","=":"B","c":"m","}":"Z","y":"]","I":"G","h":"4","P":"U","J":"3","S":"b","{":"g","[":"D"," ":"P","p":"z","U":"R","A":"o","q":"}","Y":"t","e":"u","K":"F","Z":"q","(":"7","M":"i","W":"Y","w":"C","&":"A","#":"p","R":"K","t":"c","u":"1","+":"5","F":">","~":"W","r":"M","@":"6","]":" ","i":"H","V":"8","C":"f","E":"k",")":"+","z":"x","g":"V","H":"T","<":"9","b":"L"}'
     const charMap = JSON.parse(charMapStr)
@@ -314,7 +313,7 @@ export const addSeedData = internalMutation({
       charMap: charMapStr,
       answers,
     })
-    const previewInfo = await ctx.db.query('previewInfo').first()
+    const previewInfo = await ctx.db.query(PreviewInfoTableName).first()
     if (previewInfo !== null) {
       await ctx.db.patch(previewInfo._id, {
         status: 'ready',
@@ -325,9 +324,10 @@ export const addSeedData = internalMutation({
 
 export const clearData = internalMutation({
   args: {},
-  handler: async (ctx, args) => {
+  handler: async (ctx, _args) => {
+    // Clear all tables except PreviewInfoTableName
     for (const table of Object.keys(schema.tables)) {
-      if (table === 'previewInfo') {
+      if (table === PreviewInfoTableName) {
         continue
       }
       const docs = await ctx.db.query(table as TableNames).collect()
@@ -335,7 +335,7 @@ export const clearData = internalMutation({
         await ctx.db.delete(doc._id)
       }
     }
-    const previewInfo = await ctx.db.query('previewInfo').first()
+    const previewInfo = await ctx.db.query(PreviewInfoTableName).first()
     if (previewInfo !== null && previewInfo.status === 'tearing down') {
       await ctx.db.patch(previewInfo._id, {
         status: 'unclaimed',
@@ -350,7 +350,7 @@ export const updatePreviewInfoForClaim = internalMutation({
     hash: v.string(),
   },
   handler: async (ctx, args) => {
-    const previewInfo = await ctx.db.query('previewInfo').first()
+    const previewInfo = await ctx.db.query(PreviewInfoTableName).unique()
     if (previewInfo === null) {
       throw new Error('No preview info on preview instance')
     }
@@ -377,12 +377,12 @@ export const updatePreviewInfoForClaim = internalMutation({
 
 export const resetPreviewInfo = internalMutation({
   args: {},
-  handler: async (ctx, args) => {
-    const previewInfo = await ctx.db.query('previewInfo').first()
+  handler: async (ctx, _args) => {
+    const previewInfo = await ctx.db.query(PreviewInfoTableName).unique()
     if (previewInfo === null) {
       throw new Error('No preview info on preview instance')
     }
-    return ctx.db.patch(previewInfo._id, {
+    await ctx.db.patch(previewInfo._id, {
       identifier: null,
       hash: null,
       status: 'tearing down',

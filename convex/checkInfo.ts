@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
 import { query } from './_generated/server'
+import { PreviewInfoTableName } from './schema'
 
 export default query({
   args: {
@@ -7,19 +8,19 @@ export default query({
     hash: v.string(),
   },
   handler: async (ctx, args) => {
-    const previewInfo = await ctx.db.query('previewInfo').first()
+    const previewInfo = await ctx.db.query(PreviewInfoTableName).first()
     if (previewInfo === null) {
       // This isn't a preview instance so just return
       return { success: 'success' }
     }
-    console.log(args, previewInfo)
-    if (
-      previewInfo.identifier !== args.identifier ||
-      previewInfo.hash !== args.hash
-    ) {
+    if (previewInfo.identifier !== args.identifier) {
+      return {
+        error: "This deployment isn't configured to preview this branch",
+      }
+    } else if (previewInfo.hash !== args.hash) {
       return {
         error:
-          "This deployment isn't configured to preview this branch and hash",
+          'This deployment is configured to preview this branch, but not this hash',
       }
     } else if (previewInfo.status !== 'ready') {
       return {

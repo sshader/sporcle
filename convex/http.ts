@@ -12,8 +12,8 @@ http.route({
     if (sk !== process.env.SECRET_KEY) {
       return new Response('Invalid secret key', { status: 403 })
     }
-    await ctx.runMutation(internal.init.resetPreviewInfo)
-    await ctx.runMutation(internal.init.clearData)
+    await ctx.runMutation(internal.seed.resetPreviewInfo)
+    await ctx.runMutation(internal.seed.clearData)
     return new Response('success', { status: 200 })
   }),
 })
@@ -27,11 +27,9 @@ http.route({
     if (sk !== process.env.SECRET_KEY) {
       return new Response('Invalid secret key', { status: 403 })
     }
-    const bodyText = await request.text()
-    console.log(bodyText)
-    const body: { identifier: string; hash: string } = JSON.parse(bodyText)
-    await ctx.runMutation(internal.init.updatePreviewInfoForClaim, body)
-    await ctx.runMutation(internal.init.clearData)
+    const body: { identifier: string; hash: string } = await request.json()
+    await ctx.runMutation(internal.seed.updatePreviewInfoForClaim, body)
+    await ctx.runMutation(internal.seed.clearData)
     return new Response('success', {
       status: 200,
     })
@@ -46,10 +44,9 @@ http.route({
     if (sk !== process.env.SECRET_KEY) {
       return new Response('Invalid secret key', { status: 403 })
     }
-    await ctx.runMutation(internal.init.addSeedData)
+    await ctx.runMutation(internal.seed.addSeedData)
     return new Response('success', { status: 200 })
   }),
 })
 
-// Convex expects the router to be the default export of `convex/http.js`.
 export default http
