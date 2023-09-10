@@ -20,6 +20,7 @@ export const start = mutationWithSession({
     const quiz = (await db.get(quizId))!
     return await db.insert('game', {
       quiz: quiz._id,
+      owner: session._id,
       title: quiz.title,
       finished: false,
       answers: quiz.answers.map(() => null),
@@ -28,7 +29,7 @@ export const start = mutationWithSession({
   },
 })
 
-export const setPublic = mutation({
+export const setPublic = mutationWithSession({
   args: {
     gameId: v.id('game'),
     isPublic: v.boolean(),
