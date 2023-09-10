@@ -129,7 +129,7 @@ const QuizPicker = () => {
           style={{ display: 'flex', justifyContent: 'space-between' }}
           key={r._id}
         >
-          {r.title}
+          {r.title} {r.foo}
           <button onClick={() => handleStartGame(r._id)}>Start quiz</button>
         </li>
       )
