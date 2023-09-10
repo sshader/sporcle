@@ -67,7 +67,6 @@ export const internal = internalMutation({
       sporcleUrl,
       obfuscatedAnswers: Array.from(obfuscatedAnswersSet),
       charMap: JSON.stringify(charMap),
-      foo: 'test 123',
     })
   },
 })
