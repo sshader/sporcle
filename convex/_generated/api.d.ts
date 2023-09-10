@@ -19,11 +19,11 @@ import type * as addSporcleQuiz from "../addSporcleQuiz";
 import type * as checkInfo from "../checkInfo";
 import type * as game from "../game";
 import type * as http from "../http";
-import type * as init from "../init";
 import type * as lib_middlewareUtils from "../lib/middlewareUtils";
 import type * as lib_migrations from "../lib/migrations";
 import type * as lib_withSession from "../lib/withSession";
 import type * as migrateSets from "../migrateSets";
+import type * as seed from "../seed";
 import type * as sessions from "../sessions";
 
 /**
@@ -40,11 +40,11 @@ declare const fullApi: ApiFromModules<{
   checkInfo: typeof checkInfo;
   game: typeof game;
   http: typeof http;
-  init: typeof init;
   "lib/middlewareUtils": typeof lib_middlewareUtils;
   "lib/migrations": typeof lib_migrations;
   "lib/withSession": typeof lib_withSession;
   migrateSets: typeof migrateSets;
+  seed: typeof seed;
   sessions: typeof sessions;
 }>;
 export declare const api: FilterApi<

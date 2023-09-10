@@ -1,4 +1,4 @@
-import { internalMutation, mutation, query } from './_generated/server'
+import { mutation, query } from './_generated/server'
 import { Doc } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
