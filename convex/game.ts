@@ -93,18 +93,18 @@ export const getGame = query({
         return (await db.get(db.normalizeId('sessions', sessionId)!))!
       })
     )
-    const sessionsMap = new Map()
+    const sessionsMap: Record<string, { session: Doc<"sessions">, score: number}> = {}
     sessions.forEach((session) => {
-      sessionsMap.set(session?._id, { session, score: 0 })
+      sessionsMap[session?._id] = { session, score: 0 }
     })
     game.answers.forEach((value) => {
       const answeredBy = value?.answeredBy ?? null
       if (answeredBy !== null) {
-        const current = sessionsMap.get(answeredBy)
-        sessionsMap.set(answeredBy, {
+        const current = sessionsMap[answeredBy]
+        sessionsMap[answeredBy] = {
           session: current.session,
           score: current.score + 1,
-        })
+        }
       }
     })
     return {
