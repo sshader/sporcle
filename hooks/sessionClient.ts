@@ -52,17 +52,20 @@ export const SessionProvider: React.FC<{
 
   // Get or set the ID from our desired storage location, whenever it changes.
   useEffect(() => {
-    if (sessionId) {
-      void (async () => {
+    const f = async () => {
+      if (sessionId) {
         const session = await convex.query(api.sessions.get, { sessionId })
-        setSession(session!._id)
-        store?.setItem(StoreKey, session!._id)
-      })()
-    } else {
-      void (async () => {
-        setSession(await createSession())
-      })()
-    }
+        if (session !== null) {
+          setSession(session._id)
+          store?.setItem(StoreKey, session._id)
+          return
+        }
+      }
+      const newSessionId = await createSession()
+      setSession(newSessionId)
+      store?.setItem(StoreKey, newSessionId)
+    };
+    void f()
   }, [sessionId, createSession, store])
 
   return React.createElement(
