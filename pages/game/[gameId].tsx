@@ -11,7 +11,7 @@ type GameInfo = {
   game: Doc<'game'>
   obfuscatedAnswers: Set<string>
   charMap: Record<string, string>
-  sessionsMap: Map<string, { session: Doc<'sessions'>; score: number }>
+  sessionsMap: Record<string, { session: Doc<'sessions'>; score: number }>
 }
 
 const Players = ({
@@ -102,7 +102,7 @@ const GameBoundary = () => {
         }}
       >
         <Players
-          players={Array.from(parsedGameInfo.sessionsMap.values())}
+          players={Array.from(Object.values(parsedGameInfo.sessionsMap))}
           total={gameInfo.game.answers.length}
         />
       </div>
@@ -207,7 +207,7 @@ const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
     >
       {game.answers.map((value, index) => {
         if (value !== null) {
-          const answeredBy = gameInfo.sessionsMap.get(value.answeredBy)!
+          const answeredBy = gameInfo.sessionsMap[value.answeredBy]!
           const nodeRef = createRef<HTMLDivElement>()
           return (
             <CSSTransition
