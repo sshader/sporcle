@@ -1,5 +1,5 @@
-import { internalMutation, mutation, query } from './_generated/server'
-import { Doc } from './_generated/dataModel'
+import { DatabaseReader, DatabaseWriter, internalMutation, mutation, query } from './_generated/server'
+import { Doc, Id } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
 
@@ -17,16 +17,20 @@ export const startGame = mutationWithSession({
     quizId: v.id('quiz'),
   },
   handler: async ({ db, session }, { quizId }) => {
-    const quiz = (await db.get(quizId))!
-    return await db.insert('game', {
-      quiz: quiz._id,
-      title: quiz.title,
-      finished: false,
-      answers: quiz.answers.map(() => null),
-      players: [session!._id],
-    })
+    return startGameHelper(db, session, quizId)
   },
 })
+
+export const startGameHelper = async (db: DatabaseWriter, session: Doc<"sessions">, quizId: Id<"quiz">) => {
+  const quiz = (await db.get(quizId))!
+  return await db.insert('game', {
+    quiz: quiz._id,
+    title: quiz.title,
+    finished: false,
+    answers: quiz.answers.map(() => null),
+    players: [session!._id],
+  })
+}
 
 export const setPublic = mutation({
   args: {
@@ -118,32 +122,36 @@ export const getGame = query({
   },
 })
 
+export const submitAnswerHelper = async (db: DatabaseWriter, session: Doc<"sessions">, gameId: Id<"game">, answer: string ) => {
+  const game = (await db.get(gameId))!
+  if (game.finished === true) {
+    return false
+  }
+
+  const players = new Set(game.players)
+  players.add(session!._id)
+  game.players = Array.from(players)
+
+  const quizId = game?.quiz
+  const quiz = (await db.get(quizId))!
+
+  let correct = false
+  quiz.answers.forEach((validAnswers, index) => {
+    if (validAnswers.indexOf(answer) !== -1 && game.answers[index] === null) {
+      correct = true
+      game.answers[index] = {
+        answer,
+        answeredBy: session!._id,
+      }
+    }
+  })
+  await db.patch(gameId, game)
+  return correct
+}
+
 export const submitAnswer = mutationWithSession({
   args: { gameId: v.id('game'), answer: v.string() },
   handler: async ({ db, session }, { gameId, answer }) => {
-    const game = (await db.get(gameId))!
-    if (game.finished === true) {
-      return false
-    }
-
-    const players = new Set(game.players)
-    players.add(session!._id)
-    game.players = Array.from(players)
-
-    const quizId = game?.quiz
-    const quiz = (await db.get(quizId))!
-
-    let correct = false
-    quiz.answers.forEach((validAnswers, index) => {
-      if (validAnswers.indexOf(answer) !== -1 && game.answers[index] === null) {
-        correct = true
-        game.answers[index] = {
-          answer,
-          answeredBy: session!._id,
-        }
-      }
-    })
-    await db.patch(gameId, game)
-    return correct
+    return submitAnswerHelper(db, session, gameId, answer)
   },
 })
