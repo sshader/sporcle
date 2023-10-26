@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import { internalMutation, query } from './_generated/server'
 
-const translateAnswers = (
+export const translateAnswers = (
   rawAnswers: string[],
   charMapping: Record<string, string>
 ) => {

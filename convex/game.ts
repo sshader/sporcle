@@ -1,4 +1,4 @@
-import { internalMutation, mutation, query } from './_generated/server'
+import { mutation, query } from './_generated/server'
 import { Doc } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
@@ -12,13 +12,14 @@ export const getQuizzes = query({
   },
 })
 
-export const startGame = mutationWithSession({
+export const start = mutationWithSession({
   args: {
     quizId: v.id('quiz'),
   },
   handler: async ({ db, session }, { quizId }) => {
     const quiz = (await db.get(quizId))!
     return await db.insert('game', {
+      owner: session!._id,
       quiz: quiz._id,
       title: quiz.title,
       finished: false,
@@ -93,18 +94,21 @@ export const getGame = query({
         return (await db.get(db.normalizeId('sessions', sessionId)!))!
       })
     )
-    const sessionsMap = new Map()
+    const sessionsMap: Record<
+      string,
+      { session: Doc<'sessions'>; score: number }
+    > = {}
     sessions.forEach((session) => {
-      sessionsMap.set(session?._id, { session, score: 0 })
+      sessionsMap[session?._id] = { session, score: 0 }
     })
     game.answers.forEach((value) => {
       const answeredBy = value?.answeredBy ?? null
       if (answeredBy !== null) {
-        const current = sessionsMap.get(answeredBy)
-        sessionsMap.set(answeredBy, {
+        const current = sessionsMap[answeredBy]
+        sessionsMap[answeredBy] = {
           session: current.session,
           score: current.score + 1,
-        })
+        }
       }
     })
     return {
