@@ -103,7 +103,7 @@ const QuizPicker = () => {
     {},
     { initialNumItems: 10 }
   )
-  const startGame = useSessionMutation(api.game.startGame)
+  const startGame = useSessionMutation(api.game.start)
   const addQuiz = useAction(api.actions.addSporcleQuiz.default)
   const router = useRouter()
   const [quizUrl, setQuizUrl] = useState('')
