@@ -3,7 +3,7 @@ import { api, internal } from '../_generated/api'
 import { action } from '../_generated/server'
 import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
-import { v } from 'convex/values'
+import { ConvexError, v } from 'convex/values'
 
 export default action({
   args: { sporcleUrl: v.string() },
@@ -23,16 +23,22 @@ export default action({
       headers: { 'User-Agent': 'curl/7.54.1' },
     })
     const text = await response.text()
-    const gameIdMatch = text.match(/Sporcle\.gameData\.gameID = ([0-9]+);/)
-    const sporcleGameId = gameIdMatch![1]
+    const lines = text.split("\n");
+    const answersCode = lines.find(l => l.includes("var asta ="))
+    // const gameIdMatch = text.match(/Sporcle\.gameData\.gameID = ([0-9]+);/)
+    // const sporcleGameId = gameIdMatch![1]
     const quizTitle = text.match(/<title>(.*)<\/title>/)![1]
-    const x = await fetch(
-      `https://www.sporcle.com/games/jsanswers.php?g=${sporcleGameId}`,
-      {
-        headers: { 'User-Agent': 'curl/7.54.1' },
-      }
-    )
-    const answersCode = await x.text()
+    // const x = await fetch(
+    //   `https://www.sporcle.com/games/jsanswers.php?g=${sporcleGameId}`,
+    //   {
+    //     headers: { 'User-Agent': 'curl/7.54.1' },
+    //   }
+    // )
+    // const answersCode = await x.text()
+
+    if (answersCode === undefined) {
+      throw new ConvexError("Failed to parse quiz")
+    }
 
     const parsed = parse(answersCode, {
       sourceType: 'module',
