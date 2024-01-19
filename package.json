@@ -12,7 +12,7 @@
   "dependencies": {
     "@picocss/pico": "^1.5.7",
     "@types/babel-traverse": "^6.25.7",
-    "convex": "^1.4.0-alpha.1",
+    "convex": "^1.8.0",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
