@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { internalMutation } from "./_generated/server"
+import { startGameHelper, submitAnswerHelper } from "./game"
 
 const TAYLOR_SWIFT_SONGS_QUIZ = {
   answers: [
@@ -498,14 +499,11 @@ export default internalMutation({
         color: "#2ecc71",
         name: "User 1234"
       });
-      await db.insert("game", {
-        title: undefined,
-        finished: false,
+      const player = (await db.get(playerId))!;
+      const gameId = await startGameHelper(db, player, quizId)
+      await db.patch(gameId, {
         isPublic: true,
-        quiz: quizId,
-        answers: [{ answer: "Tim McGraw", answeredBy: playerId}],
-        players: [playerId]
       })
-      
+      await submitAnswerHelper(db, player, gameId, "Tim McGraw")
     },
   })
