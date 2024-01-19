@@ -30,4 +30,14 @@ export default defineSchema({
     color: v.string(),
     name: v.string(),
   }),
+  previewInfo: defineTable({
+    identifier: v.union(v.null(), v.string()),
+    hash: v.union(v.null(), v.string()),
+    status: v.union(
+      v.literal('unclaimed'),
+      v.literal('setting up'),
+      v.literal('ready'),
+      v.literal('tearing down')
+    ),
+  }),
 })
