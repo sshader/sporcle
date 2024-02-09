@@ -133,6 +133,7 @@ export const submitAnswerHelper = async (db: DatabaseWriter, session: Doc<"sessi
   game.players = Array.from(players)
 
   const quizId = game?.quiz
+  console.log("hi")
   const quiz = (await db.get(quizId))!
 
   let correct = false
