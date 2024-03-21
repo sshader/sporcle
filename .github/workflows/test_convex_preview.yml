@@ -1,0 +1,60 @@
+name: Test Convex Preview
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  wait_for_preview:
+    name: Test setup
+    runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.waitForVercelPreviewDeployment.outputs.url }}
+    steps:
+    - name: Wait for Vercel preview deployment to be ready
+      uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
+      id: waitForVercelPreviewDeployment
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        max_timeout: 600
+        # Check at most every 30 seconds to avoid being rate-limited
+        check_interval: 30
+  test_setup:
+    needs: wait_for_preview
+    runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ needs.wait_for_preview.outputs.preview_url }}
+      convex_admin_key: ${{ steps.get-url-and-admin-key.outputs.convex_admin_key }}
+      convex_url: ${{ steps.get-url-and-admin-key.outputs.convex_url }}
+    steps:
+    - name: Prepare testing env
+      uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: "18.15.1"
+    - id: "get-url-and-admin-key"
+      run: node fetchDeploymentUrlAndAdminKey.js >> "$$GITHUB_OUTPUT"
+
+  test_e2e:
+    needs: test_setup
+    name: Playwright tests
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare testing env
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18.15.1"
+      - name: NPM v8
+        run: npm install -g npm@8 --registry=https://registry.npmjs.org
+
+      - name: npm install
+        run: npm install
+      - run: npx convex env set IS_TEST true
+      - name: Run tests
+        run: npm run test
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: ${{ needs.test_setup.outputs.preview_url }}
+          CONVEX_ADMIN_KEY: ${{ needs.test_setup.outputs.convex_admin_key }}
+          CONVEX_URL: ${{ needs.test_setup.outputs.convex_url }}
