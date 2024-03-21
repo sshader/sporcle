@@ -36,7 +36,7 @@ jobs:
     - id: "get-url-and-admin-key"
       env:
         CONVEX_PREVIEW_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-      run: node fetchDeploymentUrlAndAdminKey.mjs >> "$$GITHUB_OUTPUT"
+      run: node fetchDeploymentUrlAndAdminKey.mjs >> "$GITHUB_OUTPUT"
 
   test:
     needs: test_setup
