@@ -1,6 +1,6 @@
 
 
-const response = fetch("", {
+const response = await fetch("https://api.convex.dev/api/deployments/authorize_preview", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
