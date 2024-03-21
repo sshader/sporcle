@@ -68,6 +68,5 @@ jobs:
       - name: Run tests
         run: npm run test
         env:
-          PLAYWRIGHT_TEST_BASE_URL: ${{ needs.test_setup.outputs.preview_url }}
           CONVEX_ADMIN_KEY: ${{ needs.test_setup.outputs.convex_admin_key }}
           CONVEX_URL: ${{ needs.test_setup.outputs.convex_url }}

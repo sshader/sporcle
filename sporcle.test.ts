@@ -5,7 +5,7 @@ describe("sporcle", () => {
   let t: ConvexTestingHelper;
 
   beforeEach(() => {
-    t = new ConvexTestingHelper({ adminKey: process.env.CONVEX_ADMIN_KEY, backendUrl: process.env.CONVEX_DEPLOYMENT_URL });
+    t = new ConvexTestingHelper({ adminKey: process.env.CONVEX_ADMIN_KEY, backendUrl: process.env.CONVEX_URL });
     // Calling an internal function is allowed since we have admin auth
     t.mutation(internal.seed.default as any, {})
   });
