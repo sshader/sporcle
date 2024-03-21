@@ -33,7 +33,7 @@ jobs:
       with:
         node-version: "18.17.0"
     - id: "get-url-and-admin-key"
-      run: node fetchDeploymentUrlAndAdminKey.js >> "$$GITHUB_OUTPUT"
+      run: node fetchDeploymentUrlAndAdminKey.mjs >> "$$GITHUB_OUTPUT"
 
   test_e2e:
     needs: test_setup
