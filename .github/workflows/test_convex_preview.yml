@@ -33,6 +33,8 @@ jobs:
       with:
         node-version: "18.17.0"
     - id: "get-url-and-admin-key"
+      env:
+        CONVEX_PREVIEW_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
       run: node fetchDeploymentUrlAndAdminKey.mjs >> "$$GITHUB_OUTPUT"
 
   test_e2e:

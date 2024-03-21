@@ -2,7 +2,7 @@
 
 const response = await fetch("https://api.convex.dev/api/deployments/authorize_preview", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.CONVEX_PREVIEW_DEPLOY_KEY}` },
     body: JSON.stringify({
         previewName: process.env.GITHUB_HEAD_REF,
         projectSelection: {
