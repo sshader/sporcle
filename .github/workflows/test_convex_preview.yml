@@ -35,7 +35,7 @@ jobs:
         node-version: "18.17.0"
     - id: "get-url-and-admin-key"
       env:
-        CONVEX_PREVIEW_DEPLOY_KEY: preview:sshader:sporcle|010f75a69f0292227c3fb39e5f87d30905bd35d23555fbb6487b53e28f1c6e5db7105a0fce1d0ecf629d44c2f624ec0638b1
+        CONVEX_PREVIEW_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
       run: node fetchDeploymentUrlAndAdminKey.mjs >> "$GITHUB_OUTPUT"
 
   test:
