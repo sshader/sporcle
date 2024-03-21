@@ -25,18 +25,22 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       preview_url: ${{ needs.wait_for_preview.outputs.preview_url }}
-      convex_admin_key: ${{ steps.get-url-and-admin-key.outputs.convex_admin_key }}
-      convex_url: ${{ steps.get-url-and-admin-key.outputs.convex_url }}
+      convex_admin_key: ${{ steps.get-admin-key.outputs.convex_admin_key }}
+      convex_url: ${{ steps.get-url.outputs.convex_url }}
     steps:
     - name: Prepare testing env
       uses: actions/checkout@v3
     - uses: actions/setup-node@v3
       with:
         node-version: "18.17.0"
-    - id: "get-url-and-admin-key"
+    - id: "get-url"
       env:
         CONVEX_PREVIEW_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-      run: node fetchDeploymentUrlAndAdminKey.mjs >> "$GITHUB_OUTPUT"
+      run: node fetchDeploymentUrlAndAdminKey.mjs "url" >> "$GITHUB_OUTPUT"
+    - id: "get-admin-key"
+      env:
+        CONVEX_PREVIEW_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+      run: node fetchDeploymentUrlAndAdminKey.mjs "adminKey" >> "$GITHUB_OUTPUT"
 
   test:
     needs: test_setup
