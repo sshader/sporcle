@@ -14,6 +14,5 @@ const response = await fetch("https://api.convex.dev/api/deployment/authorize_pr
     })
 })
 const body = await response.json()
-const result = `convex_url='${body.url}' convex_admin_key='preview:${body.deploymentName}|${body.adminKey}'`
-console.log(result)
+const result = `convex_url='${body.url}' convex_admin_key='${body.adminKey}'`
 process.stdout.write(result)
