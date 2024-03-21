@@ -54,10 +54,13 @@ jobs:
 
       - name: npm install
         run: npm install
+      - run: echo $CONVEX_ADMIN_KEY
+        env:
+          CONVEX_ADMIN_KEY: ${{ needs.test_setup.outputs.convex_admin_key }}
       - name: Set env var
         run: npx convex env set IS_TEST true --preview-name $GITHUB_HEAD_REF
         env:
-          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+          CONVEX_DEPLOY_KEY: ${{ needs.test_setup.outputs.convex_admin_key }}
       - name: Run tests
         run: npm run test
         env:
