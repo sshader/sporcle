@@ -28,7 +28,7 @@ describe("sporcle", () => {
     
     const { game: updatedGame, sessionsMap } = await t.query(api.game.getGame, { gameId: game._id })
     expect(updatedGame.players.length).toStrictEqual(2);
-    expect(game.players.includes(sessionA)).toStrictEqual(true)
+    expect(updatedGame.players.includes(sessionA)).toStrictEqual(true)
     expect(sessionsMap[sessionA].score).toStrictEqual(1)
   });
 });
