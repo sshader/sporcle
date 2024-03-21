@@ -1,4 +1,6 @@
 
+import process from "process"
+
 
 const response = await fetch("https://api.convex.dev/api/deployment/authorize_preview", {
     method: "POST",
@@ -12,4 +14,4 @@ const response = await fetch("https://api.convex.dev/api/deployment/authorize_pr
     })
 })
 const body = await response.json()
-console.log(`convex_url=${body.url} convex_admin_key='preview:${body.deploymentName}|${body.adminKey}'`)
+process.stdout.write(`convex_url=${body.url} convex_admin_key='preview:${body.deploymentName}|${body.adminKey}'`)
