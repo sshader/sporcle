@@ -2,10 +2,11 @@ import { DatabaseReader, DatabaseWriter, internalMutation, mutation, query } fro
 import { Doc, Id } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
+import { paginationOptsValidator } from 'convex/server'
 
 export const getQuizzes = query({
   args: {
-    paginationOpts: v.any(),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async ({ db }, { paginationOpts }) => {
     return await db.query('quiz').order('desc').paginate(paginationOpts)
@@ -45,7 +46,7 @@ export const setPublic = mutation({
 })
 
 export const getPublicGames = query({
-  args: { paginationOpts: v.any() },
+  args: { paginationOpts: paginationOptsValidator },
   handler: async ({ db }, { paginationOpts }) => {
     return await db
       .query('game')
