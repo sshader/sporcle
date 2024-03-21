@@ -6,7 +6,7 @@ on:
 
 jobs:
   wait_for_preview:
-    name: Test setup
+    name: Wait for preview
     runs-on: ubuntu-latest
     outputs:
       preview_url: ${{ steps.waitForVercelPreviewDeployment.outputs.url }}
@@ -21,6 +21,7 @@ jobs:
         check_interval: 30
   test_setup:
     needs: wait_for_preview
+    name: "Test setup"
     runs-on: ubuntu-latest
     outputs:
       preview_url: ${{ needs.wait_for_preview.outputs.preview_url }}
@@ -37,9 +38,9 @@ jobs:
         CONVEX_PREVIEW_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
       run: node fetchDeploymentUrlAndAdminKey.mjs >> "$$GITHUB_OUTPUT"
 
-  test_e2e:
+  test:
     needs: test_setup
-    name: Playwright tests
+    name: Convex tests
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -56,7 +57,7 @@ jobs:
       - name: Set env var
         run: npx convex env set IS_TEST true --preview-name $GITHUB_HEAD_REF
         env:
-          CONVEX_DEPLOY_KEY: ${{ needs.test_setup.outputs.convex_admin_key }}
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
       - name: Run tests
         run: npm run test
         env:
