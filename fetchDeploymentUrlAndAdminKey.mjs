@@ -14,5 +14,5 @@ const response = await fetch("https://api.convex.dev/api/deployment/authorize_pr
     })
 })
 const body = await response.json()
-const result = process.argv[2] === "url" ? `convex_url='${body.url}'` : `convex_admin_key='${body.adminKey}'`
+const result = process.argv[2] === "url" ? `convex_url=${body.url}` : `convex_admin_key=${body.adminKey}`
 process.stdout.write(result)
