@@ -490,7 +490,7 @@ const TAYLOR_SWIFT_SONGS_QUIZ = {
   title: "Taylor Swift Songs Quiz",
 }
 
-export default internalMutation({
+export const seed = internalMutation({
     handler: async (
       { db },
     ) => {

@@ -1,18 +1,14 @@
-import { api, internal } from "./convex/_generated/api";
-import { ConvexTestingHelper } from "convex-helpers/testing";
+import { api, internal } from "../_generated/api";
+import { convexTest, TestConvex } from "convex-test";
+import { describe, expect, test, beforeEach } from "vitest";
+import schema from "../schema";
 
 describe("sporcle", () => {
-  let t: ConvexTestingHelper;
+  let t: TestConvex<typeof schema>;
 
   beforeEach(async () => {
-    t = new ConvexTestingHelper({ adminKey: process.env.CONVEX_ADMIN_KEY, backendUrl: process.env.CONVEX_URL });
-    // Calling an internal function is allowed since we have admin auth
-    await t.withIdentity(t.newIdentity({})).mutation(internal.seed.default as any, {})
-  });
-
-  afterEach(async () => {
-    await t.mutation(api.testing.clearAll, {});
-    await t.close();
+    const t = convexTest(schema)
+    await t.withIdentity({}).mutation(api.seed.seed, {})
   });
 
   test("join game", async () => {
