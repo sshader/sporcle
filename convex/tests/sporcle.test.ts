@@ -8,7 +8,7 @@ describe("sporcle", () => {
 
   beforeEach(async () => {
     const t = convexTest(schema)
-    await t.withIdentity({}).mutation(api.seed.seed, {})
+    await t.withIdentity({}).mutation(internal.seed.seed, {})
   });
 
   test("join game", async () => {

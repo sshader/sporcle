@@ -41,7 +41,6 @@ jobs:
       env:
         CONVEX_PREVIEW_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
       run: node fetchDeploymentUrlAndAdminKey.mjs "adminKey" >> "$GITHUB_OUTPUT"
-
   test:
     needs: test_setup
     name: Convex tests

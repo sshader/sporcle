@@ -9,7 +9,7 @@ export default defineSchema({
     obfuscatedAnswers: v.array(v.string()),
     // stringified JSON
     charMap: v.string(),
-  }),
+  }).index("ByUrl", ["sporcleUrl"]),
   game: defineTable({
     quiz: v.id('quiz'),
     title: v.optional(v.string()),

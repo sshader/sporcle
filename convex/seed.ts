@@ -494,7 +494,8 @@ export const seed = internalMutation({
     handler: async (
       { db },
     ) => {
-      const quizId = await db.insert('quiz', TAYLOR_SWIFT_SONGS_QUIZ)
+      const existingQuiz = await db.query('quiz').withIndex("ByUrl", q => q.eq("sporcleUrl", TAYLOR_SWIFT_SONGS_QUIZ.sporcleUrl)).unique();
+      const quizId = existingQuiz !== null ? existingQuiz._id : await db.insert('quiz', TAYLOR_SWIFT_SONGS_QUIZ)
       const playerId = await db.insert("sessions", {
         color: "#2ecc71",
         name: "User 1234"
