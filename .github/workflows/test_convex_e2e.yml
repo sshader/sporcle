@@ -1,4 +1,4 @@
-name: Test Convex Preview
+name: Test Convex E2E
 on:
   pull_request:
     branches:
@@ -29,8 +29,8 @@ jobs:
       convex_url: ${{ steps.get-url.outputs.convex_url }}
     steps:
     - name: Prepare testing env
-      uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
         node-version: "18.17.0"
     - id: "get-url"
@@ -48,8 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare testing env
-        uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "18.17.0"
       - name: NPM v8
