@@ -5,8 +5,6 @@ import {
   } from "convex-helpers/server/customFunctions";
   import { action, mutation, query } from "./_generated/server";
 import schema from "./schema";
-import { WithoutSystemFields } from "convex/server";
-import { Doc } from "./_generated/dataModel";
 
 // Wrappers to use for function that should only be called from tests
 export const testingQuery = customQuery(query, {

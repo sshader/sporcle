@@ -56,14 +56,18 @@ jobs:
       - name: NPM v8
         run: npm install -g npm@8 --registry=https://registry.npmjs.org
 
-      - name: npm install
-        run: npm install
+      - name: npm ci
+        run: npm ci
+      - run: npx playwright install --with-deps
       - name: Set env var
         run: npx convex env set IS_TEST true --preview-name $GITHUB_HEAD_REF
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-      - name: Run tests
-        run: npm run test
+      - name: Run e2e tests
+        run: npm run test:e2e
         env:
           CONVEX_ADMIN_KEY: ${{ needs.test_setup.outputs.convex_admin_key }}
-          CONVEX_URL: ${{ needs.test_setup.outputs.convex_url }}
+          NEXT_PUBLIC_CONVEX_URL: ${{ needs.test_setup.outputs.convex_url }}
+          PLAYWRIGHT_TEST_BASE_URL: ${{ needs.test_setup.outputs.preview_url }}
+
+
