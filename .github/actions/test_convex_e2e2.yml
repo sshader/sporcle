@@ -1,4 +1,4 @@
-name: Test Convex E2E
+name: Test Convex E2E2
 on:
   workflow_dispatch:
   pull_request:
