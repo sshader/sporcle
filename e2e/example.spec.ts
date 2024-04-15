@@ -3,6 +3,9 @@ import { internal } from "../convex/_generated/api"
 import { ConvexClient } from 'convex/browser';
 
 test('join game and submit answer', async ({ page }) => {
+  console.log(process.env.NEXT_PUBLIC_CONVEX_URL)
+  console.log(process.env.CONVEX_ADMIN_KEY)
+  console.log(process.env.PLAYWRIGHT_TEST_BASE_URL)
   const client = new ConvexClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
   (client as any).setAdminAuth(process.env.CONVEX_ADMIN_KEY)
   // Can call internal mutations since we have `CONVEX_ADMIN_KEY`
