@@ -4,7 +4,15 @@ import { defineConfig, devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// require('dotenv').config();
+const dotenv = require('dotenv');
+dotenv.config({
+  path: '.env',
+  override: true
+});
+dotenv.config({
+  path: '.env.local',
+  override: true
+});
 
 /**
  * See https://playwright.dev/docs/test-configuration.
