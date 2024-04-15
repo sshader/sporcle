@@ -1,4 +1,4 @@
-import { DatabaseReader, DatabaseWriter, internalMutation, mutation, query } from './_generated/server'
+import { DatabaseWriter, internalMutation, mutation, query } from './_generated/server'
 import { Doc, Id } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
