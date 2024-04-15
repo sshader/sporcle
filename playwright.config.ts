@@ -4,16 +4,12 @@ import { defineConfig, devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
+// Prefer existing env variables (i.e. ones set via a GH action), then `.env.local`, then `.env`
 const dotenv = require('dotenv');
 dotenv.config({
-  path: '.env',
-  override: true
+  path: ['.env.local', '.env'],
+  override: false
 });
-dotenv.config({
-  path: '.env.local',
-  override: true
-});
-
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
