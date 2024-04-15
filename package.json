@@ -7,7 +7,10 @@
     "dev:server": "convex dev",
     "dev:client": "next dev",
     "dev:init": "convex dev --once",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest --dir convex/tests",
+    "test:once": "vitest run --dir convex/tests",
+    "test:debug": "vitest --dir convex/tests --inspect-brk --no-file-parallelism"
   },
   "dependencies": {
     "@picocss/pico": "^1.5.7",
@@ -28,8 +31,11 @@
     "@types/react-dom": "^18.0.10",
     "@types/react-transition-group": "^4.4.5",
     "ast-parser": "^0.2.0",
+    "convex-test": "^0.0.9",
+    "dotenv": "^16.4.5",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.4",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "vitest": "^1.5.0"
   }
 }
