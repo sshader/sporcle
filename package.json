@@ -1,5 +1,6 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "npm-run-all init dev:init --parallel dev:server dev:client",
     "build": "tsc && next build",
@@ -16,7 +17,8 @@
   "dependencies": {
     "@picocss/pico": "^1.5.7",
     "@types/babel-traverse": "^6.25.7",
-    "convex": "^1.11.0",
+    "convex": "^1.12.2",
+    "convex-helpers": "^0.1.33",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

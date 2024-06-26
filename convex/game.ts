@@ -1,11 +1,18 @@
-import { DatabaseReader, DatabaseWriter, internalMutation, mutation, query } from './_generated/server'
+import {
+  DatabaseReader,
+  DatabaseWriter,
+  internalMutation,
+  mutation,
+  query,
+} from './_generated/server'
 import { Doc, Id } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
+import { paginationOptsValidator } from 'convex/server'
 
 export const getQuizzes = query({
   args: {
-    paginationOpts: v.any(),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async ({ db }, { paginationOpts }) => {
     return await db.query('quiz').order('desc').paginate(paginationOpts)
@@ -21,7 +28,11 @@ export const startGame = mutationWithSession({
   },
 })
 
-export const startGameHelper = async (db: DatabaseWriter, session: Doc<"sessions">, quizId: Id<"quiz">) => {
+export const startGameHelper = async (
+  db: DatabaseWriter,
+  session: Doc<'sessions'>,
+  quizId: Id<'quiz'>
+) => {
   const quiz = (await db.get(quizId))!
   return await db.insert('game', {
     quiz: quiz._id,
@@ -97,7 +108,10 @@ export const getGame = query({
         return (await db.get(db.normalizeId('sessions', sessionId)!))!
       })
     )
-    const sessionsMap: Record<string, { session: Doc<"sessions">, score: number}> = {}
+    const sessionsMap: Record<
+      string,
+      { session: Doc<'sessions'>; score: number }
+    > = {}
     sessions.forEach((session) => {
       sessionsMap[session?._id] = { session, score: 0 }
     })
@@ -122,7 +136,12 @@ export const getGame = query({
   },
 })
 
-export const submitAnswerHelper = async (db: DatabaseWriter, session: Doc<"sessions">, gameId: Id<"game">, answer: string ) => {
+export const submitAnswerHelper = async (
+  db: DatabaseWriter,
+  session: Doc<'sessions'>,
+  gameId: Id<'game'>,
+  answer: string
+) => {
   const game = (await db.get(gameId))!
   if (game.finished === true) {
     return false
@@ -151,7 +170,7 @@ export const submitAnswerHelper = async (db: DatabaseWriter, session: Doc<"sessi
 
 export const submitAnswer = mutationWithSession({
   args: { gameId: v.id('game'), answer: v.string() },
-  handler: async ({ db, session }, { gameId, answer }) => {
+  handler: async ({ db, session }, { gameId, answer }): Promise<boolean> => {
     return submitAnswerHelper(db, session, gameId, answer)
   },
 })
