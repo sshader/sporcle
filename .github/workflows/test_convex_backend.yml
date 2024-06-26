@@ -1,0 +1,37 @@
+name: Test Convex E2E
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare testing env
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18.17.0"
+      - name: NPM v8
+        run: npm install -g npm@8 --registry=https://registry.npmjs.org
+
+      - name: npm ci
+        run: npm ci
+      - uses: supplypike/setup-bin@v4
+        with:
+          uri: 'https://github.com/google/go-containerregistry/releases/download/v0.19.1/go-containerregistry_Linux_x86_64.tar.gz'
+          name: 'convex-local-backend'
+      - run: npx playwright install --with-deps
+      - name: Set env var
+        run: npx convex env set IS_TEST true --preview-name $GITHUB_HEAD_REF
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+      - name: Run e2e tests
+        run: npm run test:e2e
+        env:
+          CONVEX_ADMIN_KEY: ${{ needs.test_setup.outputs.convex_admin_key }}
+          NEXT_PUBLIC_CONVEX_URL: ${{ needs.test_setup.outputs.convex_url }}
+          PLAYWRIGHT_TEST_BASE_URL: ${{ needs.test_setup.outputs.preview_url }}
+

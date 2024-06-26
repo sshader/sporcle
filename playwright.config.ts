@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  * https://github.com/motdotla/dotenv
  */
 // Prefer existing env variables (i.e. ones set via a GH action), then `.env.local`, then `.env`
-const dotenv = require('dotenv');
+import dotenv from "dotenv";
 dotenv.config({
   path: ['.env.local', '.env'],
   override: false

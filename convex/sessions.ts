@@ -1,4 +1,4 @@
-import { ObjectType, PropertyValidators, v } from 'convex/values'
+import { ObjectType, PropertyValidators, Validator, v } from 'convex/values'
 import { Doc } from './_generated/dataModel'
 import {
   DatabaseReader,
@@ -19,6 +19,12 @@ import {
   ValidatedFunction,
 } from 'convex/server'
 
+type NullToUndefinedOrNull<T> = T extends null ? T | undefined | void : T
+
+export type ValidatorTypeToReturnType<T> =
+  | Promise<NullToUndefinedOrNull<T>>
+  | NullToUndefinedOrNull<T>
+
 const sessionMiddlewareValidator = { sessionId: v.string() }
 const transformContextForSession = async <Ctx>(
   ctx: Ctx & { db: DatabaseReader },
@@ -26,6 +32,7 @@ const transformContextForSession = async <Ctx>(
 ): Promise<Ctx & { session: Doc<'sessions'> }> => {
   const normaliedId = ctx.db.normalizeId('sessions', args.sessionId)
   const session = normaliedId ? await ctx.db.get(normaliedId) : null
+  console.log('hello')
   if (!session) {
     throw new Error(
       'Session must be initialized first. ' +
@@ -55,6 +62,7 @@ export const withSession = generateMiddlewareContextOnly<
  * @param func - Your function that can now take in a `session` in the ctx param.
  * @returns A Convex serverless function.
  */
+
 export function mutationWithSession<
   ArgsValidator extends PropertyValidators,
   Output
@@ -62,7 +70,7 @@ export function mutationWithSession<
   func: ValidatedFunction<
     MutationCtx & { session: Doc<'sessions'> },
     ArgsValidator,
-    Promise<Output>
+    Output
   >
 ): RegisteredMutation<
   'public',

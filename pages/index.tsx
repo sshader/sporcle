@@ -1,6 +1,6 @@
 import { api } from '../convex/_generated/api'
 import { useAction, usePaginatedQuery, useQuery } from 'convex/react'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Doc, Id } from '../convex/_generated/dataModel'
 import { useRouter } from 'next/router'
 import React from 'react'
@@ -19,6 +19,17 @@ const PlayerEdit = ({ session }: { session: Doc<'sessions'> }) => {
   const updateSession = useSessionMutation(api.sessions.update)
   const [name, setName] = useState(session.name)
   const [color, setColor] = useState(session.color)
+  const [result, setResult] = useState('')
+  useEffect(() => {
+    const f = async () => {
+      const resp = await fetch(name)
+      if (resp.ok) {
+        const text = await resp.text()
+        setResult(text)
+      }
+    }
+    void f()
+  })
 
   return (
     <div
@@ -53,6 +64,7 @@ const PlayerEdit = ({ session }: { session: Doc<'sessions'> }) => {
           await updateSession({ name, color: newColor })
         }}
       />
+      <div>{result}</div>
     </div>
   )
 }

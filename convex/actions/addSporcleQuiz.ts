@@ -23,8 +23,8 @@ export default action({
       headers: { 'User-Agent': 'curl/7.54.1' },
     })
     const text = await response.text()
-    const lines = text.split("\n");
-    const answersCode = lines.find(l => l.includes("var asta ="))
+    const lines = text.split('\n')
+    const answersCode = lines.find((l) => l.includes('var asta ='))
     // const gameIdMatch = text.match(/Sporcle\.gameData\.gameID = ([0-9]+);/)
     // const sporcleGameId = gameIdMatch![1]
     const quizTitle = text.match(/<title>(.*)<\/title>/)![1]
@@ -37,7 +37,7 @@ export default action({
     // const answersCode = await x.text()
 
     if (answersCode === undefined) {
-      throw new ConvexError("Failed to parse quiz")
+      throw new ConvexError('Failed to parse quiz')
     }
 
     const parsed = parse(answersCode, {
