@@ -19,7 +19,6 @@ export default defineSchema({
   quiz: defineTable({
     answers: v.array(v.array(v.string())),
     title: v.string(),
-    foo: v.string(),
     sporcleUrl: v.string(),
     obfuscatedAnswers: v.array(v.string()),
     // stringified JSON
