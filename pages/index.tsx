@@ -4,7 +4,11 @@ import { useContext, useState } from 'react'
 import { Doc, Id } from '../convex/_generated/dataModel'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { SessionContext, useSessionMutation } from '../hooks/sessionClient'
+import {
+  SessionContext,
+  useSessionMutation,
+  useSessionQuery,
+} from '../hooks/sessionClient'
 
 const renderLoading = () => {
   return (
@@ -66,6 +70,7 @@ const GamePicker = () => {
     }
   )
   const router = useRouter()
+  const sessionId = useContext(SessionContext)
   async function handleStartGame(gameId: Id<'game'>) {
     await router.push({
       pathname: '/game/[gameId]',
@@ -82,6 +87,7 @@ const GamePicker = () => {
           style={{ display: 'flex', justifyContent: 'space-between' }}
           key={r._id}
         >
+          {r.owner === sessionId ? '🌟' : ''}
           {r.title ?? 'Ongoing game'}
           <button onClick={() => handleStartGame(r._id)}>Join game</button>
         </li>
