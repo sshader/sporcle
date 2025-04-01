@@ -1,4 +1,10 @@
-import { DatabaseReader, DatabaseWriter, internalMutation, mutation, query } from './_generated/server'
+import {
+  DatabaseReader,
+  DatabaseWriter,
+  internalMutation,
+  mutation,
+  query,
+} from './_generated/server'
 import { Doc, Id } from './_generated/dataModel'
 import { mutationWithSession } from './sessions'
 import { v } from 'convex/values'
@@ -21,14 +27,19 @@ export const startGame = mutationWithSession({
   },
 })
 
-export const startGameHelper = async (db: DatabaseWriter, session: Doc<"sessions">, quizId: Id<"quiz">) => {
+export const startGameHelper = async (
+  db: DatabaseWriter,
+  session: Doc<'sessions'>,
+  quizId: Id<'quiz'>
+) => {
   const quiz = (await db.get(quizId))!
   return await db.insert('game', {
     quiz: quiz._id,
     title: quiz.title,
     finished: false,
     answers: quiz.answers.map(() => null),
-    players: [session!._id],
+    players: [session._id],
+    owner: session._id,
   })
 }
 
@@ -97,7 +108,10 @@ export const getGame = query({
         return (await db.get(db.normalizeId('sessions', sessionId)!))!
       })
     )
-    const sessionsMap: Record<string, { session: Doc<"sessions">, score: number}> = {}
+    const sessionsMap: Record<
+      string,
+      { session: Doc<'sessions'>; score: number }
+    > = {}
     sessions.forEach((session) => {
       sessionsMap[session?._id] = { session, score: 0 }
     })
@@ -122,7 +136,12 @@ export const getGame = query({
   },
 })
 
-export const submitAnswerHelper = async (db: DatabaseWriter, session: Doc<"sessions">, gameId: Id<"game">, answer: string ) => {
+export const submitAnswerHelper = async (
+  db: DatabaseWriter,
+  session: Doc<'sessions'>,
+  gameId: Id<'game'>,
+  answer: string
+) => {
   const game = (await db.get(gameId))!
   if (game.finished === true) {
     return false
