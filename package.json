@@ -16,7 +16,7 @@
   "dependencies": {
     "@picocss/pico": "^1.5.7",
     "@types/babel-traverse": "^6.25.7",
-    "convex": "^1.20.1-alpha.0",
+    "convex": "^1.21.1-alpha.2",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
