@@ -49,7 +49,7 @@
 
 /* react-transition-group animation for answer reveals */
 .item-enter {
-  background-color: #fda7df;
+  background-color: #ff69b4;
 }
 
 .item-enter-active {
@@ -69,11 +69,12 @@
 /* Highlight border for newly answered cells */
 .cell-highlight {
   animation: cell-highlight-pulse 1.5s ease-out;
+  border-radius: 0.375rem;
 }
 
 @keyframes cell-highlight-pulse {
   0% {
-    box-shadow: 0 0 0 2px hsl(var(--ring));
+    box-shadow: 0 0 0 3px #ff69b4;
   }
   100% {
     box-shadow: 0 0 0 0px transparent;

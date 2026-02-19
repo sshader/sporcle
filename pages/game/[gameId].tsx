@@ -142,12 +142,20 @@ function GuessInput({
       const wasCorrect = await submitAnswer(text)
       if (wasCorrect) {
         setAnswerText("")
+        setBeaten(false)
+        clearTimeout(beatenTimeout.current)
       } else {
         // Answer was valid but already taken by someone else
-        setAnswerText("")
+        // Don't clear input — let the user keep typing (e.g. "i" -> "i've")
         setBeaten(true)
         clearTimeout(beatenTimeout.current)
         beatenTimeout.current = setTimeout(() => setBeaten(false), 2000)
+      }
+    } else {
+      // Text no longer matches a taken answer, hide the beaten message
+      if (beaten) {
+        setBeaten(false)
+        clearTimeout(beatenTimeout.current)
       }
     }
   }
@@ -202,12 +210,12 @@ function Game({ gameInfo, autoScroll }: { gameInfo: GameInfo; autoScroll: boolea
 
     if (newlyFilled.length === 0) return
 
-    // Scroll the last newly filled cell toward center of viewport
+    // Scroll only one newly filled cell into view (the topmost one)
     if (autoScroll) {
-      const lastIndex = newlyFilled[newlyFilled.length - 1]
-      const lastEl = cellRefs.current.get(lastIndex)
-      if (lastEl) {
-        const rect = lastEl.getBoundingClientRect()
+      const firstIndex = newlyFilled[0]
+      const firstEl = cellRefs.current.get(firstIndex)
+      if (firstEl) {
+        const rect = firstEl.getBoundingClientRect()
         const targetY = rect.top + window.scrollY - window.innerHeight / 2 + rect.height / 2
         window.scrollTo({ top: targetY, behavior: "smooth" })
       }
