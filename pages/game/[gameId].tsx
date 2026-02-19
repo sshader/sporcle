@@ -2,15 +2,14 @@ import { api } from '../../convex/_generated/api'
 import { useQuery, useMutation } from 'convex/react'
 
 import { Doc } from '../../convex/_generated/dataModel'
-import { ChangeEvent, createRef, useContext, useState } from 'react'
+import { ChangeEvent, createRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import { useSessionMutation, SessionContext } from '../../hooks/sessionClient'
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
-
+import { useSessionId } from '../../pages/_app'
 type GameInfo = {
   game: Doc<'game'>
   obfuscatedAnswers: Set<string>
-  charMap: Record<string, string>
+  charMap: Record<string, string> | null
   sessionsMap: Record<string, { session: Doc<'sessions'>; score: number }>
 }
 
@@ -21,9 +20,9 @@ const Players = ({
   players: { session: Doc<'sessions'>; score: number }[]
   total: number
 }) => {
-  const sessionId = useContext(SessionContext)!
+  const sessionId = useSessionId()
   const currentPlayerIndex = players.findIndex(
-    (p) => p.session._id === sessionId
+    (p) => (p.session._id as string) === (sessionId as string | undefined)
   )
   if (currentPlayerIndex === -1) {
     return null
@@ -73,7 +72,7 @@ const GameBoundary = () => {
   const parsedGameInfo: GameInfo = {
     ...gameInfo,
     obfuscatedAnswers: new Set(gameInfo.obfuscatedAnswers),
-    charMap: JSON.parse(gameInfo.charMap),
+    charMap: gameInfo.charMap ? JSON.parse(gameInfo.charMap) : null,
   }
 
   return (
@@ -83,13 +82,15 @@ const GameBoundary = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 5 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
           <h2>{gameInfo.title}</h2>
-          <span>
-            (
-            <a href={gameInfo.sporcleUrl} target="_blank">
-              Original quiz
-            </a>
-            )
-          </span>
+          {gameInfo.sporcleUrl && (
+            <span>
+              (
+              <a href={gameInfo.sporcleUrl} target="_blank">
+                Original quiz
+              </a>
+              )
+            </span>
+          )}
         </div>
         <GameControls gameInfo={parsedGameInfo} />
       </div>
@@ -175,21 +176,27 @@ const GameControls = ({ gameInfo }: { gameInfo: GameInfo }) => {
 
 const Game = ({ gameInfo }: { gameInfo: GameInfo }) => {
   const game = gameInfo.game
+  const sessionId = useSessionId()
+  const submitAnswer = useMutation(api.game.submitAnswer)
 
-  const submitAnswer = useSessionMutation(api.game.submitAnswer)
   const isPossibleAnswer = (answer: string) => {
     const trimmed = answer.trim()
-    let translated = ''
-    for (const c of trimmed.split('')) {
-      translated += gameInfo.charMap[c] ?? c
+    if (gameInfo.charMap) {
+      let translated = ''
+      for (const c of trimmed.split('')) {
+        translated += gameInfo.charMap[c] ?? c
+      }
+      return gameInfo.obfuscatedAnswers.has(translated)
     }
-    return gameInfo.obfuscatedAnswers.has(translated)
+    // For custom quizzes without charMap, always return true and let server validate
+    return trimmed.length > 0
   }
+
   const guessInput = (
     <GuessInput
       isPossibleAnswer={isPossibleAnswer}
       submitAnswer={(text: string) =>
-        submitAnswer({ gameId: game._id, answer: text.trim() })
+        submitAnswer({ gameId: game._id, answer: text.trim(), sessionId })
       }
     />
   )

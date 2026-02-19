@@ -5,10 +5,9 @@ export default defineSchema({
   quiz: defineTable({
     answers: v.array(v.array(v.string())),
     title: v.string(),
-    sporcleUrl: v.string(),
-    obfuscatedAnswers: v.array(v.string()),
-    // stringified JSON
-    charMap: v.string(),
+    sporcleUrl: v.optional(v.string()),
+    obfuscatedAnswers: v.optional(v.array(v.string())),
+    charMap: v.optional(v.string()),
   }),
   game: defineTable({
     quiz: v.id('quiz'),
@@ -25,6 +24,7 @@ export default defineSchema({
     players: v.array(v.string()),
     finished: v.optional(v.boolean()),
     isPublic: v.optional(v.boolean()),
+    lastActiveTime: v.optional(v.number()),
   }).index('by_finished_and_public', ['finished', 'isPublic']),
   sessions: defineTable({
     color: v.string(),

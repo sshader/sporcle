@@ -3,13 +3,14 @@ import { api, internal } from "../_generated/api";
 import { convexTest, TestConvex } from "convex-test";
 import { describe, expect, test, beforeEach } from "vitest";
 import schema from "../schema";
+import type { SessionId } from "convex-helpers/server/sessions";
 
 describe("sporcle", () => {
   let t: TestConvex<typeof schema>;
 
   beforeEach(async () => {
     t = convexTest(schema)
-    await t.withIdentity({}).mutation(internal.seed.default, {})
+    await t.mutation(internal.seed.default, {})
   });
 
   test("join game", async () => {
@@ -21,7 +22,7 @@ describe("sporcle", () => {
     const game = games[0];
     expect(game.players.length).toStrictEqual(1)
     expect(game.players.includes(sessionA)).toStrictEqual(false)
-    await t.mutation(api.game.submitAnswer, { gameId: game._id, sessionId: sessionA, answer: "Lavender Haze" })
+    await t.mutation(api.game.submitAnswer, { gameId: game._id, sessionId: sessionA as unknown as SessionId, answer: "Lavender Haze" })
 
     const { game: updatedGame, sessionsMap } = await t.query(api.game.getGame, { gameId: game._id })
     expect(updatedGame.players.length).toStrictEqual(2);

@@ -1,6 +1,6 @@
-import { DatabaseReader, DatabaseWriter, internalMutation, mutation, query } from './_generated/server'
+import { DatabaseWriter, mutation, query } from './_generated/server'
 import { Doc, Id } from './_generated/dataModel'
-import { mutationWithSession } from './sessions'
+import { mutationWithSession } from './functions'
 import { v } from 'convex/values'
 
 export const getQuizzes = query({
@@ -21,12 +21,19 @@ export const startGame = mutationWithSession({
   },
 })
 
-export const startGameHelper = async (db: DatabaseWriter, session: Doc<"sessions">, quizId: Id<"quiz">) => {
+export const startGameHelper = async (
+  db: DatabaseWriter,
+  session: Doc<'sessions'>,
+  quizId: Id<'quiz'>
+) => {
   const quiz = (await db.get(quizId))!
+  const now = Date.now()
   return await db.insert('game', {
     quiz: quiz._id,
     title: quiz.title,
     finished: false,
+    isPublic: true,
+    lastActiveTime: now,
     answers: quiz.answers.map(() => null),
     players: [session!._id],
   })
@@ -47,13 +54,35 @@ export const setPublic = mutation({
 export const getPublicGames = query({
   args: { paginationOpts: v.any() },
   handler: async ({ db }, { paginationOpts }) => {
-    return await db
+    const result = await db
       .query('game')
       .withIndex('by_finished_and_public', (q) =>
         q.eq('finished', false).eq('isPublic', true)
       )
       .order('desc')
       .paginate(paginationOpts)
+
+    const pagesWithPlayers = await Promise.all(
+      result.page.map(async (game) => {
+        const playerSessions = await Promise.all(
+          game.players.slice(0, 5).map(async (playerId) => {
+            const normalizedId = db.normalizeId('sessions', playerId)
+            return normalizedId ? await db.get(normalizedId) : null
+          })
+        )
+        return {
+          ...game,
+          playerSessions: playerSessions.filter(
+            (s): s is Doc<'sessions'> => s !== null
+          ),
+        }
+      })
+    )
+
+    return {
+      ...result,
+      page: pagesWithPlayers,
+    }
   },
 })
 
@@ -97,7 +126,10 @@ export const getGame = query({
         return (await db.get(db.normalizeId('sessions', sessionId)!))!
       })
     )
-    const sessionsMap: Record<string, { session: Doc<"sessions">, score: number}> = {}
+    const sessionsMap: Record<
+      string,
+      { session: Doc<'sessions'>; score: number }
+    > = {}
     sessions.forEach((session) => {
       sessionsMap[session?._id] = { session, score: 0 }
     })
@@ -113,16 +145,21 @@ export const getGame = query({
     })
     return {
       game,
-      obfuscatedAnswers: quiz.obfuscatedAnswers,
-      charMap: quiz.charMap,
+      obfuscatedAnswers: quiz.obfuscatedAnswers ?? [],
+      charMap: quiz.charMap ?? null,
       title: quiz.title,
-      sporcleUrl: quiz.sporcleUrl,
+      sporcleUrl: quiz.sporcleUrl ?? null,
       sessionsMap,
     }
   },
 })
 
-export const submitAnswerHelper = async (db: DatabaseWriter, session: Doc<"sessions">, gameId: Id<"game">, answer: string ) => {
+export const submitAnswerHelper = async (
+  db: DatabaseWriter,
+  session: Doc<'sessions'>,
+  gameId: Id<'game'>,
+  answer: string
+) => {
   const game = (await db.get(gameId))!
   if (game.finished === true) {
     return false
@@ -145,7 +182,10 @@ export const submitAnswerHelper = async (db: DatabaseWriter, session: Doc<"sessi
       }
     }
   })
-  await db.patch(gameId, game)
+  await db.patch(gameId, {
+    ...game,
+    lastActiveTime: Date.now(),
+  })
   return correct
 }
 
@@ -153,5 +193,18 @@ export const submitAnswer = mutationWithSession({
   args: { gameId: v.id('game'), answer: v.string() },
   handler: async ({ db, session }, { gameId, answer }) => {
     return submitAnswerHelper(db, session, gameId, answer)
+  },
+})
+
+export const createQuiz = mutation({
+  args: {
+    title: v.string(),
+    answers: v.array(v.array(v.string())),
+  },
+  handler: async ({ db }, { title, answers }) => {
+    return await db.insert('quiz', {
+      title,
+      answers,
+    })
   },
 })

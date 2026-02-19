@@ -51,7 +51,6 @@ export const internal = internalMutation({
     { sporcleUrl, title, obfuscatedAnswersStr, charMapStr }
   ) => {
     const charMap = JSON.parse(charMapStr)
-    // "foo\\'bar" -> "foo\'bar" because something got double escaped
     const x = obfuscatedAnswersStr.replaceAll('\\', '')
     const obfuscatedAnswers = JSON.parse(x)
     const obfuscatedAnswersSet = new Set<string>()
@@ -70,4 +69,3 @@ export const internal = internalMutation({
     })
   },
 })
-

@@ -15,7 +15,7 @@ export const quizMigration = migrations({
   table: 'quiz',
   migrateDoc: async (ctx: MutationCtx, quiz: Doc<'quiz'>) => {
     const answers = quiz.answers.map((a) => Array.from(a))
-    const obfuscatedAnswers = Array.from(quiz.obfuscatedAnswers)
+    const obfuscatedAnswers = quiz.obfuscatedAnswers ? Array.from(quiz.obfuscatedAnswers) : undefined
     await ctx.db.patch(quiz._id, {
       answers,
       obfuscatedAnswers,
