@@ -17,7 +17,7 @@ const formatRelativeTime = (timestamp: number) => {
 }
 
 export function GamePicker() {
-  const { results } = usePaginatedQuery(
+  const { results, status, loadMore } = usePaginatedQuery(
     api.game.getPublicGames,
     {},
     { initialNumItems: 10 }
@@ -78,6 +78,16 @@ export function GamePicker() {
           </Button>
         </div>
       ))}
+      {status === "CanLoadMore" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={() => loadMore(10)}
+        >
+          Load more
+        </Button>
+      )}
     </div>
   )
 }

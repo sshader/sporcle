@@ -8,7 +8,11 @@ export const getQuizzes = query({
     paginationOpts: v.any(),
   },
   handler: async ({ db }, { paginationOpts }) => {
-    return await db.query('quiz').order('desc').paginate(paginationOpts)
+    return await db
+      .query('quiz')
+      .withIndex('by_last_activity')
+      .order('desc')
+      .paginate(paginationOpts)
   },
 })
 
@@ -28,6 +32,7 @@ export const startGameHelper = async (
 ) => {
   const quiz = (await db.get(quizId))!
   const now = Date.now()
+  await db.patch(quizId, { lastActivityTime: now })
   return await db.insert('game', {
     quiz: quiz._id,
     title: quiz.title,
@@ -174,7 +179,8 @@ export const submitAnswerHelper = async (
 
   let correct = false
   quiz.answers.forEach((validAnswers, index) => {
-    if (validAnswers.indexOf(answer) !== -1 && game.answers[index] === null) {
+    const normalizedAnswer = answer.toLowerCase()
+    if (validAnswers.some(v => v.toLowerCase() === normalizedAnswer) && game.answers[index] === null) {
       correct = true
       game.answers[index] = {
         answer,
@@ -196,15 +202,82 @@ export const submitAnswer = mutationWithSession({
   },
 })
 
+function addCaseVariants(answers: string[][]): string[][] {
+  return answers.map((variants) => {
+    const seen = new Set(variants)
+    const expanded = [...variants]
+    for (const v of variants) {
+      const lower = v.toLowerCase()
+      if (!seen.has(lower)) {
+        expanded.push(lower)
+        seen.add(lower)
+      }
+      const upper = v.toUpperCase()
+      if (!seen.has(upper.toLowerCase())) {
+        expanded.push(upper)
+        seen.add(upper.toLowerCase())
+      }
+      const title = v.replace(
+        /\w\S*/g,
+        (w) => w[0].toUpperCase() + w.slice(1).toLowerCase()
+      )
+      if (!seen.has(title.toLowerCase())) {
+        expanded.push(title)
+        seen.add(title.toLowerCase())
+      }
+    }
+    return expanded
+  })
+}
+
+function generateCharMap(): Record<string, string> {
+  // All printable ASCII chars we want to map
+  const chars =
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  const shuffled = chars.split('')
+  // Fisher-Yates shuffle
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  const map: Record<string, string> = {}
+  for (let i = 0; i < chars.length; i++) {
+    map[chars[i]] = shuffled[i]
+  }
+  return map
+}
+
+function obfuscate(
+  text: string,
+  charMap: Record<string, string>
+): string {
+  return text
+    .split('')
+    .map((c) => charMap[c] ?? c)
+    .join('')
+}
+
 export const createQuiz = mutation({
   args: {
     title: v.string(),
     answers: v.array(v.array(v.string())),
   },
   handler: async ({ db }, { title, answers }) => {
+    const withCaseVariants = addCaseVariants(answers)
+
+    const charMap = generateCharMap()
+    const obfuscatedAnswersSet = new Set<string>()
+    for (const variants of withCaseVariants) {
+      for (const v of variants) {
+        obfuscatedAnswersSet.add(obfuscate(v, charMap))
+      }
+    }
+
     return await db.insert('quiz', {
       title,
-      answers,
+      answers: withCaseVariants,
+      charMap: JSON.stringify(charMap),
+      obfuscatedAnswers: Array.from(obfuscatedAnswersSet),
     })
   },
 })

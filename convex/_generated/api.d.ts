@@ -9,6 +9,8 @@
  */
 
 import type * as actions_addSporcleQuiz from "../actions/addSporcleQuiz.js";
+import type * as actions_checkQuiz from "../actions/checkQuiz.js";
+import type * as actions_generateQuiz from "../actions/generateQuiz.js";
 import type * as addSporcleQuiz from "../addSporcleQuiz.js";
 import type * as functions from "../functions.js";
 import type * as game from "../game.js";
@@ -25,6 +27,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "actions/addSporcleQuiz": typeof actions_addSporcleQuiz;
+  "actions/checkQuiz": typeof actions_checkQuiz;
+  "actions/generateQuiz": typeof actions_generateQuiz;
   addSporcleQuiz: typeof addSporcleQuiz;
   functions: typeof functions;
   game: typeof game;

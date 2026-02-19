@@ -6,7 +6,7 @@ import { useSessionId } from "@/pages/_app"
 import { Button } from "@/components/ui/button"
 
 export function QuizPicker() {
-  const { results } = usePaginatedQuery(
+  const { results, status, loadMore } = usePaginatedQuery(
     api.game.getQuizzes,
     {},
     { initialNumItems: 10 }
@@ -51,6 +51,16 @@ export function QuizPicker() {
           </Button>
         </div>
       ))}
+      {status === "CanLoadMore" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={() => loadMore(10)}
+        >
+          Load more
+        </Button>
+      )}
     </div>
   )
 }

@@ -1,22 +1,23 @@
 import { Layout } from "@/components/Layout"
 import { GamePicker } from "@/components/GamePicker"
 import { QuizPicker } from "@/components/QuizPicker"
-import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function Home() {
   return (
     <Layout>
-      <div className="space-y-8">
-        <section>
-          <h2 className="text-xl font-semibold mb-3">Ongoing Games</h2>
+      <Tabs defaultValue="games">
+        <TabsList>
+          <TabsTrigger value="games">Ongoing Games</TabsTrigger>
+          <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="games">
           <GamePicker />
-        </section>
-        <Separator />
-        <section>
-          <h2 className="text-xl font-semibold mb-3">Quizzes</h2>
+        </TabsContent>
+        <TabsContent value="quizzes">
           <QuizPicker />
-        </section>
-      </div>
+        </TabsContent>
+      </Tabs>
     </Layout>
   )
 }

@@ -8,7 +8,8 @@ export default defineSchema({
     sporcleUrl: v.optional(v.string()),
     obfuscatedAnswers: v.optional(v.array(v.string())),
     charMap: v.optional(v.string()),
-  }),
+    lastActivityTime: v.optional(v.number()),
+  }).index('by_last_activity', ['lastActivityTime']),
   game: defineTable({
     quiz: v.id('quiz'),
     title: v.optional(v.string()),
