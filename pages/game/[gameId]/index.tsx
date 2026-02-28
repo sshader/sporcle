@@ -3,10 +3,11 @@ import { useQuery, useMutation } from "convex/react"
 import { Doc } from "@/convex/_generated/dataModel"
 import { ChangeEvent, createRef, useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/router"
+import Link from "next/link"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
-import { useSessionId } from "@/pages/_app"
 import { Layout } from "@/components/Layout"
-import { Badge } from "@/components/ui/badge"
+import { Players } from "@/components/Players"
+import { useRequireAuth } from "@/hooks/useRequireAuth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
@@ -23,50 +24,6 @@ type GameInfo = {
   obfuscatedAnswers: Set<string>
   charMap: Record<string, string> | null
   sessionsMap: Record<string, { session: Doc<"sessions">; score: number }>
-}
-
-function Players({
-  players,
-  total,
-}: {
-  players: { session: Doc<"sessions">; score: number }[]
-  total: number
-}) {
-  const sessionId = useSessionId()
-  const currentPlayerIndex = players.findIndex(
-    (p) => (p.session._id as string) === (sessionId as string | undefined)
-  )
-  if (currentPlayerIndex === -1) {
-    return null
-  }
-
-  const currentPlayer = players[currentPlayerIndex]
-  players[currentPlayerIndex] = players[0]
-  players[0] = currentPlayer
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {players.map((p) => (
-        <Tooltip key={p.session._id}>
-          <TooltipTrigger asChild>
-            <div>
-              <Badge
-                variant="outline"
-                className="cursor-default px-3 py-1 text-sm"
-                style={{ borderColor: p.session.color, borderWidth: 2 }}
-              >
-                {p.session.name}
-              </Badge>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            Score: {p.score} / {total} (
-            {Math.floor((p.score / total) * 100)}%)
-          </TooltipContent>
-        </Tooltip>
-      ))}
-    </div>
-  )
 }
 
 function GameControls({
@@ -135,6 +92,13 @@ function GuessInput({
   const [answerText, setAnswerText] = useState("")
   const [beaten, setBeaten] = useState(false)
   const beatenTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const { requireAuth } = useRequireAuth()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const handleFocus = () => {
+    if (!requireAuth()) {
+      inputRef.current?.blur()
+    }
+  }
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const text = event.target.value
     setAnswerText(text)
@@ -162,7 +126,9 @@ function GuessInput({
   return (
     <div className="sticky bottom-0 bg-background border-t pt-3 pb-4">
       <Input
+        ref={inputRef}
         value={answerText}
+        onFocus={handleFocus}
         onChange={handleChange}
         placeholder="Type your guess..."
         className="text-base"
@@ -179,7 +145,6 @@ function GuessInput({
 
 function Game({ gameInfo, autoScroll }: { gameInfo: GameInfo; autoScroll: boolean }) {
   const game = gameInfo.game
-  const sessionId = useSessionId()
   const submitAnswer = useMutation(api.game.submitAnswer)
   const cellRefs = useRef<Map<number, HTMLDivElement>>(new Map())
   const prevAnswersRef = useRef<typeof game.answers>(game.answers)
@@ -236,10 +201,9 @@ function Game({ gameInfo, autoScroll }: { gameInfo: GameInfo; autoScroll: boolea
       return submitAnswer({
         gameId: game._id,
         answer: text.trim(),
-        sessionId,
       })
     },
-    [submitAnswer, game._id, sessionId]
+    [submitAnswer, game._id]
   )
 
   const setCellRef = useCallback(
@@ -350,6 +314,13 @@ export default function GameBoundary() {
                 total={gameInfo.game.answers.length}
               />
             </div>
+            {gameInfo.game.finished && (
+              <Link href={`/game/${gameIdStr}/replay`}>
+                <Button variant="outline" size="sm">
+                  Watch Replay
+                </Button>
+              </Link>
+            )}
             <GameControls
               gameInfo={parsedGameInfo}
               autoScroll={autoScroll}

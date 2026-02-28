@@ -1,51 +1,23 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 
-import { ConvexProvider, ConvexReactClient, useMutation, useQuery } from 'convex/react'
+import { ConvexReactClient, useConvexAuth, useQuery } from 'convex/react'
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { api } from '../convex/_generated/api';
-import { useEffect } from 'react';
-import { useLocalStorage } from 'usehooks-ts'
-import { SessionId } from 'convex-helpers/server/sessions';
+import { Id } from '../convex/_generated/dataModel';
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
-export function useSessionId(): SessionId {
-  const [sessionId] = useLocalStorage('sessionId', null)
-  if (!sessionId) {
-    throw new Error('Session ID is not set')
-  }
-  return sessionId as SessionId
+export function useSessionId(): Id<'sessions'> | null {
+  const { isAuthenticated } = useConvexAuth()
+  const session = useQuery(api.sessions.get, isAuthenticated ? {} : "skip")
+  return session?._id ?? null
 }
-
-function SessionWrapper({ children }: { children: React.ReactNode }) {
-  const [sessionId] = useLocalStorage('sessionId', null)
-  const session = useQuery(api.sessions.get, sessionId ? { sessionId } : 'skip')
-  const createSession = useMutation(api.sessions.create)
-  useEffect(() => {
-    async function createSessionIfNeeded() {
-      if (session === null || sessionId === null) {
-        const newSessionId = await createSession()
-        localStorage.setItem('sessionId', JSON.stringify(newSessionId))
-      }
-    }
-    createSessionIfNeeded()
-  }, [session, createSession, sessionId])
-  if (session === undefined || session === null) {
-    return <div>Loading...</div>
-  }
-  return <>{children}</>
-}
-
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ConvexProvider client={convex}>
-      <SessionWrapper>
-        <Component {...pageProps} />
-      </SessionWrapper>
-    </ConvexProvider>
+    <ConvexAuthProvider client={convex}>
+      <Component {...pageProps} />
+    </ConvexAuthProvider>
   )
 }
-
-
-

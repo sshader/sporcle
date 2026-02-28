@@ -100,11 +100,13 @@ export const endGame = mutation({
       color: '#cccccc',
       name: 'Revealed',
     })
+    const now = Date.now()
     quiz.answers.forEach((validAnswers, index) => {
       if (game.answers[index] === null) {
         game.answers[index] = {
           answer: Array.from(validAnswers)[0],
           answeredBy: finishSessionId,
+          answeredAt: now,
         }
       }
     })
@@ -185,6 +187,7 @@ export const submitAnswerHelper = async (
       game.answers[index] = {
         answer,
         answeredBy: session!._id,
+        answeredAt: Date.now(),
       }
     }
   })

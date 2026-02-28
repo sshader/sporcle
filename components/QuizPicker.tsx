@@ -2,8 +2,8 @@ import { usePaginatedQuery, useMutation } from "convex/react"
 import { useRouter } from "next/router"
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
-import { useSessionId } from "@/pages/_app"
 import { Button } from "@/components/ui/button"
+import { useRequireAuth } from "@/hooks/useRequireAuth"
 
 export function QuizPicker() {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -11,15 +11,17 @@ export function QuizPicker() {
     {},
     { initialNumItems: 10 }
   )
-  const sessionId = useSessionId()
   const startGame = useMutation(api.game.startGame)
   const router = useRouter()
+  const { requireAuth } = useRequireAuth()
 
   async function handleStartGame(quizId: Id<"quiz">) {
-    const gameId = await startGame({ quizId, sessionId })
-    await router.push({
-      pathname: "/game/[gameId]",
-      query: { gameId },
+    requireAuth(async () => {
+      const gameId = await startGame({ quizId })
+      await router.push({
+        pathname: "/game/[gameId]",
+        query: { gameId },
+      })
     })
   }
 

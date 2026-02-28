@@ -1,47 +1,42 @@
-import { query, mutation, action } from './_generated/server'
+import { query, mutation } from './_generated/server'
 import {
   customQuery,
   customMutation,
-  customAction,
 } from 'convex-helpers/server/customFunctions'
-import { SessionIdArg } from 'convex-helpers/server/sessions'
-import { Doc } from './_generated/dataModel'
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const queryWithSession = customQuery(query, {
-  args: SessionIdArg,
-  input: async (ctx, { sessionId }) => {
-    const normalizedId = ctx.db.normalizeId('sessions', sessionId)
-    const session = normalizedId ? await ctx.db.get(normalizedId) : null
-    if (!session) {
-      throw new Error(
-        'Session must be initialized first. ' +
-          'Are you wrapping your code with <SessionProvider>? ' +
-          'Are you requiring a session from a query that executes immediately?'
-      )
+  args: {},
+  input: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('Not authenticated');
     }
-    return { ctx: { session }, args: {} }
+    const session = await ctx.db
+      .query('sessions')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .unique();
+    if (!session) {
+      throw new Error('Session not found for authenticated user');
+    }
+    return { ctx: { session }, args: {} };
   },
 })
 
 export const mutationWithSession = customMutation(mutation, {
-  args: SessionIdArg,
-  input: async (ctx, { sessionId }) => {
-    const normalizedId = ctx.db.normalizeId('sessions', sessionId)
-    const session = normalizedId ? await ctx.db.get(normalizedId) : null
-    if (!session) {
-      throw new Error(
-        'Session must be initialized first. ' +
-          'Are you wrapping your code with <SessionProvider>? ' +
-          'Are you requiring a session from a query that executes immediately?'
-      )
+  args: {},
+  input: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('Not authenticated');
     }
-    return { ctx: { session }, args: {} }
-  },
-})
-
-export const actionWithSession = customAction(action, {
-  args: SessionIdArg,
-  input: async (_ctx, { sessionId }) => {
-    return { ctx: { sessionId }, args: {} }
+    const session = await ctx.db
+      .query('sessions')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .unique();
+    if (!session) {
+      throw new Error('Session not found for authenticated user');
+    }
+    return { ctx: { session }, args: {} };
   },
 })

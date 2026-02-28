@@ -1,7 +1,9 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
+import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
+  ...authTables,
   quiz: defineTable({
     answers: v.array(v.array(v.string())),
     title: v.string(),
@@ -18,6 +20,7 @@ export default defineSchema({
         v.object({
           answer: v.string(),
           answeredBy: v.id('sessions'),
+          answeredAt: v.optional(v.number()),
         }),
         v.null()
       )
@@ -30,5 +33,6 @@ export default defineSchema({
   sessions: defineTable({
     color: v.string(),
     name: v.string(),
-  }),
+    userId: v.optional(v.id('users')),
+  }).index('by_userId', ['userId']),
 })
